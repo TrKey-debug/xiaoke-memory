@@ -1,66 +1,71 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const { Pool } = require('pg');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', name: '小克记忆库', version: '1.0.0' });
+// 数据库连接池
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
-// 注意：存在 /tmp 目录的数据在 Railway 重启时会丢失，以后有需求可以换成数据库
-const MEMORY_FILE = path.join('/tmp', 'memories.json');
-const ACTIVITY_FILE = path.join('/tmp', 'activity.json');
-
-function loadData(file) {
+// 自动初始化数据库表
+async function initDB() {
   try {
-    if (fs.existsSync(file)) {
-      return JSON.parse(fs.readFileSync(file, 'utf8'));
-    }
-  } catch (e) {}
-  return [];
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS memories (
+        id SERIAL PRIMARY KEY,
+        content TEXT NOT NULL,
+        category VARCHAR(50) DEFAULT '日常',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS activities (
+        id SERIAL PRIMARY KEY,
+        app VARCHAR(100) NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('数据库表初始化成功！');
+  } catch (err) {
+    console.error('初始化数据库失败:', err);
+  }
 }
+initDB();
 
-function saveData(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', name: '小克记忆库(数据库版)', version: '2.0.0' });
+});
 
-// 用来保存 Claude 的长连接
 const sseClients = new Set();
 
-// 核心修复1：专门用来给 Claude 推送消息的函数
 function sendToClaude(data) {
   for (const client of sseClients) {
     client.write(`event: message\ndata: ${JSON.stringify(data)}\n\n`);
   }
 }
 
-// 核心修复2：Claude 建立连接的入口
 app.get('/sse', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // 直接告诉 Claude 正确的绝对路径
-  res.write(`event: endpoint\ndata: https://xiaoke-memory-production.up.railway.app/messages\n\n`);
-  
+  const host = req.headers.host;
+  res.write(`event: endpoint\ndata: https://${host}/messages\n\n`);
+  
   sseClients.add(res);
   req.on('close', () => {
     sseClients.delete(res);
   });
 });
 
-// 核心修复3：处理 Claude 发来的指令
 app.post('/messages', async (req, res) => {
   const message = req.body;
-  
-  // 必须先回复 202 Accepted，这是规范
   res.status(202).send('Accepted');
-  
+  
   if (message.method === 'initialize') {
     return sendToClaude({
       jsonrpc: '2.0',
@@ -68,11 +73,11 @@ app.post('/messages', async (req, res) => {
       result: {
         protocolVersion: '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: '小克记忆库', version: '1.0.0' }
+        serverInfo: { name: '小克记忆库', version: '2.0.0' }
       }
     });
   }
-  
+  
   if (message.method === 'tools/list') {
     return sendToClaude({
       jsonrpc: '2.0',
@@ -114,121 +119,88 @@ app.post('/messages', async (req, res) => {
             }
           },
           {
-            name: 'send_bark',
-            description: '发送推送通知到安生的手机',
+            name: 'read_activity',
+            description: '读取手机使用记录',
             inputSchema: {
               type: 'object',
               properties: {
-                key: { type: 'string', description: 'Bark Key' },
-                title: { type: 'string', description: '通知标题' },
-                content: { type: 'string', description: '通知内容' }
-              },
-              required: ['key', 'title', 'content']
-            }
-          },
-          {
-            name: 'read_activity',
-            description: '读取今日手机使用记录',
-            inputSchema: {
-              type: 'object',
-              properties: {}
+                 limit: { type: 'number', description: '返回最近几条记录，默认20' }
+              }
             }
           }
         ]
       }
     });
   }
-  
+  
   if (message.method === 'tools/call') {
     const { name, arguments: args } = message.params;
     let result;
-    
+    
     try {
       if (name === 'write_memory') {
-        const memories = loadData(MEMORY_FILE);
-        const entry = {
-          id: Date.now(),
-          content: args.content,
-          category: args.category || '日常',
-          created_at: new Date().toISOString()
-        };
-        memories.push(entry);
-        saveData(MEMORY_FILE, memories);
-        result = { success: true, entry };
+        const cat = args.category || '日常';
+        const queryRes = await pool.query(
+          'INSERT INTO memories (content, category) VALUES ($1, $2) RETURNING *',
+          [args.content, cat]
+        );
+        result = { success: true, entry: queryRes.rows[0] };
       }
       else if (name === 'read_memory') {
-        const memories = loadData(MEMORY_FILE);
-        let data = memories;
-        if (args.category) data = data.filter(m => m.category === args.category);
-        if (args.limit) data = data.slice(-parseInt(args.limit));
-        result = data;
+        let queryStr = 'SELECT * FROM memories';
+        let queryParams = [];
+        let conditions = [];
+
+        if (args.category) {
+          queryParams.push(args.category);
+          conditions.push(`category = $${queryParams.length}`);
+        }
+        
+        if (conditions.length > 0) {
+          queryStr += ' WHERE ' + conditions.join(' AND ');
+        }
+        
+        queryStr += ' ORDER BY created_at DESC';
+        
+        if (args.limit) {
+          queryParams.push(parseInt(args.limit));
+          queryStr += ` LIMIT $${queryParams.length}`;
+        }
+
+        const queryRes = await pool.query(queryStr, queryParams);
+        
+        // 🔥 核心瘦身：纯文本返回，丢掉大括号和时间戳
+        const texts = queryRes.rows.map(row => row.content);
+        result = texts.length > 0 ? texts.join('\n') : '暂无相关记忆';
       }
       else if (name === 'delete_memory') {
-        let memories = loadData(MEMORY_FILE);
-        memories = memories.filter(m => m.id !== args.id);
-        saveData(MEMORY_FILE, memories);
+        await pool.query('DELETE FROM memories WHERE id = $1', [args.id]);
         result = { success: true };
       }
-      else if (name === 'send_bark') {
-        const url = `https://api.day.app/${args.key}/${encodeURIComponent(args.title)}/${encodeURIComponent(args.content)}`;
-        const response = await fetch(url);
-        result = await response.json();
-      }
       else if (name === 'read_activity') {
-        const activities = loadData(ACTIVITY_FILE);
-        const today = new Date().toDateString();
-        result = activities.filter(a => new Date(a.time).toDateString() === today);
+        const limit = args.limit || 20;
+        const queryRes = await pool.query('SELECT * FROM activities ORDER BY time DESC LIMIT $1', [limit]);
+        result = queryRes.rows;
       }
-      
+      
       return sendToClaude({
         jsonrpc: '2.0',
         id: message.id,
-        result: {
-          content: [{ type: 'text', text: JSON.stringify(result) }]
-        }
+        result: { content: [{ type: 'text', text: JSON.stringify(result) }] }
       });
     } catch (e) {
+      console.error("Tool execution error:", e);
       return sendToClaude({
         jsonrpc: '2.0',
         id: message.id,
-        error: { code: -32603, message: e.message }
+        error: { code: -32603, message: '数据库操作失败: ' + e.message }
       });
     }
   }
-  
-  sendToClaude({
-    jsonrpc: '2.0',
-    id: message.id,
-    error: { code: -32601, message: 'Method not found' }
-  });
-});
-
-// REST API
-app.post('/memory', (req, res) => {
-  const { content, category } = req.body;
-  const memories = loadData(MEMORY_FILE);
-  const entry = { id: Date.now(), content, category: category || '日常', created_at: new Date().toISOString() };
-  memories.push(entry);
-  saveData(MEMORY_FILE, memories);
-  res.json({ success: true, entry });
-});
-
-app.get('/memory', (req, res) => {
-  res.json(loadData(MEMORY_FILE));
-});
-
-app.get('/activity/toggle/:app', (req, res) => {
-  const appName = req.params.app;
-  const activities = loadData(ACTIVITY_FILE);
-  const last = activities.filter(a => a.app === appName).slice(-1)[0];
-  const action = (!last || last.action === 'close') ? 'open' : 'close';
-  const entry = { app: appName, action, time: new Date().toISOString() };
-  activities.push(entry);
-  saveData(ACTIVITY_FILE, activities.slice(-200));
-  res.json({ success: true, entry });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`小克记忆库运行在端口 ${PORT}`);
+  console.log(`小克记忆库(数据库版)运行在端口 ${PORT}`);
 });
+
