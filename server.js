@@ -6,10 +6,12 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 app.get('/', (req, res) => {
   res.json({ status: 'ok', name: '小克记忆库', version: '1.0.0' });
 });
 
+// 注意：存在 /tmp 目录的数据在 Railway 重启时会丢失，以后有需求可以换成数据库
 const MEMORY_FILE = path.join('/tmp', 'memories.json');
 const ACTIVITY_FILE = path.join('/tmp', 'activity.json');
 
@@ -26,50 +28,41 @@ function saveData(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// SSE clients
+// 用来保存 Claude 的长连接
 const sseClients = new Set();
-// Claude POST to /sse
-app.post('/sse', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.write(`event: endpoint\ndata: ${JSON.stringify({uri: "/messages"})}\n\n`);
-  sseClients.add(res);
-  req.on('close', () => { sseClients.delete(res); });
-});
 
-// Handle weird path
-app.post('/{"uri":"/messages"}', (req, res) => {
-  req.url = '/messages';
-  app.handle(req, res);
-});
+// 核心修复1：专门用来给 Claude 推送消息的函数
+function sendToClaude(data) {
+  for (const client of sseClients) {
+    client.write(`event: message\ndata: ${JSON.stringify(data)}\n\n`);
+  }
+}
 
-// MCP SSE endpoint
+// 核心修复2：Claude 建立连接的入口
 app.get('/sse', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  
-  // Send endpoint info
-  res.write(`event: endpoint\ndata: ${JSON.stringify({
-    uri: '/messages'
-  })}\n\n`);
+
+  // 直接告诉 Claude 正确的绝对路径
+  res.write(`event: endpoint\ndata: https://xiaoke-memory-production.up.railway.app/messages\n\n`);
   
   sseClients.add(res);
-  
   req.on('close', () => {
     sseClients.delete(res);
   });
 });
 
-// MCP messages endpoint
+// 核心修复3：处理 Claude 发来的指令
 app.post('/messages', async (req, res) => {
   const message = req.body;
   
+  // 必须先回复 202 Accepted，这是规范
+  res.status(202).send('Accepted');
+  
   if (message.method === 'initialize') {
-    return res.json({
+    return sendToClaude({
       jsonrpc: '2.0',
       id: message.id,
       result: {
@@ -81,7 +74,7 @@ app.post('/messages', async (req, res) => {
   }
   
   if (message.method === 'tools/list') {
-    return res.json({
+    return sendToClaude({
       jsonrpc: '2.0',
       id: message.id,
       result: {
@@ -187,7 +180,7 @@ app.post('/messages', async (req, res) => {
         result = activities.filter(a => new Date(a.time).toDateString() === today);
       }
       
-      return res.json({
+      return sendToClaude({
         jsonrpc: '2.0',
         id: message.id,
         result: {
@@ -195,7 +188,7 @@ app.post('/messages', async (req, res) => {
         }
       });
     } catch (e) {
-      return res.json({
+      return sendToClaude({
         jsonrpc: '2.0',
         id: message.id,
         error: { code: -32603, message: e.message }
@@ -203,14 +196,14 @@ app.post('/messages', async (req, res) => {
     }
   }
   
-  res.json({
+  sendToClaude({
     jsonrpc: '2.0',
     id: message.id,
     error: { code: -32601, message: 'Method not found' }
   });
 });
 
-// REST API endpoints
+// REST API
 app.post('/memory', (req, res) => {
   const { content, category } = req.body;
   const memories = loadData(MEMORY_FILE);
@@ -221,8 +214,7 @@ app.post('/memory', (req, res) => {
 });
 
 app.get('/memory', (req, res) => {
-  const memories = loadData(MEMORY_FILE);
-  res.json(memories);
+  res.json(loadData(MEMORY_FILE));
 });
 
 app.get('/activity/toggle/:app', (req, res) => {
@@ -234,49 +226,6 @@ app.get('/activity/toggle/:app', (req, res) => {
   activities.push(entry);
   saveData(ACTIVITY_FILE, activities.slice(-200));
   res.json({ success: true, entry });
-});
-// OAuth endpoints for Claude MCP
-app.post('/register', (req, res) => {
-  res.json({
-    client_id: 'xiaoke-memory-client',
-    client_secret: 'xiaoke-memory-secret'
-  });
-});
-
-app.get('/.well-known/oauth-protected-resource', (req, res) => {
-  res.json({
-    resource: `https://xiaoke-memory-production.up.railway.app`,
-    authorization_servers: [`https://xiaoke-memory-production.up.railway.app`]
-  });
-});
-app.get('/.well-known/oauth-protected-resource/sse', (req, res) => {
-  res.json({
-    resource: `https://xiaoke-memory-production.up.railway.app/sse`,
-    authorization_servers: [`https://xiaoke-memory-production.up.railway.app`]
-  });
-});
-
-app.get('/.well-known/oauth-authorization-server', (req, res) => {
-  res.json({
-    issuer: `https://xiaoke-memory-production.up.railway.app`,
-    authorization_endpoint: `https://xiaoke-memory-production.up.railway.app/authorize`,
-    token_endpoint: `https://xiaoke-memory-production.up.railway.app/token`,
-    response_types_supported: ['code'],
-    grant_types_supported: ['authorization_code']
-  });
-});
-
-app.get('/authorize', (req, res) => {
-  const { redirect_uri, state } = req.query;
-  res.redirect(`${redirect_uri}?code=xiaoke-auth-code&state=${state}`);
-});
-
-app.post('/token', (req, res) => {
-  res.json({
-    access_token: 'xiaoke-memory-token',
-    token_type: 'bearer',
-    expires_in: 86400
-  });
 });
 
 const PORT = process.env.PORT || 3000;
