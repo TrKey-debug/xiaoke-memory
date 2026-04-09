@@ -1,7 +1,3 @@
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', name: '小克记忆库', version: '1.0.0' });
-});
-
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -10,6 +6,9 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', name: '小克记忆库', version: '1.0.0' });
+});
 
 const MEMORY_FILE = path.join('/tmp', 'memories.json');
 const ACTIVITY_FILE = path.join('/tmp', 'activity.json');
