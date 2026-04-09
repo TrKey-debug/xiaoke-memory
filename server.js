@@ -25,6 +25,22 @@ function saveData(file, data) {
 
 // SSE clients
 const sseClients = new Set();
+// Claude POST to /sse
+app.post('/sse', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.write(`event: endpoint\ndata: ${JSON.stringify({uri: "/messages"})}\n\n`);
+  sseClients.add(res);
+  req.on('close', () => { sseClients.delete(res); });
+});
+
+// Handle weird path
+app.post('/{"uri":"/messages"}', (req, res) => {
+  req.url = '/messages';
+  app.handle(req, res);
+});
 
 // MCP SSE endpoint
 app.get('/sse', (req, res) => {
