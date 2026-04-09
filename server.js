@@ -216,6 +216,43 @@ app.get('/activity/toggle/:app', (req, res) => {
   saveData(ACTIVITY_FILE, activities.slice(-200));
   res.json({ success: true, entry });
 });
+// OAuth endpoints for Claude MCP
+app.post('/register', (req, res) => {
+  res.json({
+    client_id: 'xiaoke-memory-client',
+    client_secret: 'xiaoke-memory-secret'
+  });
+});
+
+app.get('/.well-known/oauth-protected-resource', (req, res) => {
+  res.json({
+    resource: `https://xiaoke-memory-production.up.railway.app`,
+    authorization_servers: [`https://xiaoke-memory-production.up.railway.app`]
+  });
+});
+
+app.get('/.well-known/oauth-authorization-server', (req, res) => {
+  res.json({
+    issuer: `https://xiaoke-memory-production.up.railway.app`,
+    authorization_endpoint: `https://xiaoke-memory-production.up.railway.app/authorize`,
+    token_endpoint: `https://xiaoke-memory-production.up.railway.app/token`,
+    response_types_supported: ['code'],
+    grant_types_supported: ['authorization_code']
+  });
+});
+
+app.get('/authorize', (req, res) => {
+  const { redirect_uri, state } = req.query;
+  res.redirect(`${redirect_uri}?code=xiaoke-auth-code&state=${state}`);
+});
+
+app.post('/token', (req, res) => {
+  res.json({
+    access_token: 'xiaoke-memory-token',
+    token_type: 'bearer',
+    expires_in: 86400
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
