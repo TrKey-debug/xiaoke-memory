@@ -1,3 +1,35 @@
+// MCP协议支持
+app.get('/mcp', (req, res) => {
+  res.json({
+    name: "小克记忆库",
+    version: "1.0.0",
+    tools: [
+      {
+        name: "write_memory",
+        description: "写入一条记忆",
+        inputSchema: {
+          type: "object",
+          properties: {
+            content: { type: "string", description: "记忆内容" },
+            category: { type: "string", description: "分类" }
+          },
+          required: ["content"]
+        }
+      },
+      {
+        name: "read_memory",
+        description: "读取记忆",
+        inputSchema: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            limit: { type: "number" }
+          }
+        }
+      }
+    ]
+  });
+});
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
