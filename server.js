@@ -1,3 +1,7 @@
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', name: '小克记忆库', version: '1.0.0' });
+});
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
