@@ -246,6 +246,12 @@ app.get('/.well-known/oauth-protected-resource', (req, res) => {
     authorization_servers: [`https://xiaoke-memory-production.up.railway.app`]
   });
 });
+app.get('/.well-known/oauth-protected-resource/sse', (req, res) => {
+  res.json({
+    resource: `https://xiaoke-memory-production.up.railway.app/sse`,
+    authorization_servers: [`https://xiaoke-memory-production.up.railway.app`]
+  });
+});
 
 app.get('/.well-known/oauth-authorization-server', (req, res) => {
   res.json({
