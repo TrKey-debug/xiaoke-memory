@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小克记忆库</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f7fa; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        
+        /* 输入区样式 */
+        .input-section { margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid #eee; }
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; }
+        .controls { display: flex; justify-content: space-between; align-items: center; }
+        select, button { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; }
+        button { background-color: #4a90e2; color: white; border: none; cursor: pointer; transition: background 0.2s; font-weight: bold; }
+        button:hover { background-color: #357abd; }
+        
+        /* 日历样式 */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .day-name { font-weight: bold; color: #7f8c8d; font-size: 14px; padding-bottom: 10px; }
+        .day { padding: 15px 5px; background: #f8f9fa; border-radius: 6px; position: relative; cursor: pointer; transition: background 0.2s; min-height: 40px; display: flex; flex-direction: column; align-items: center; }
+        .day:hover { background: #e9ecef; }
+        .day.empty { background: transparent; cursor: default; }
+        
+        /* 心情圆点 */
+        .dots-container { display: flex; gap: 3px; margin-top: 5px; flex-wrap: wrap; justify-content: center; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot-开心 { background-color: #4cd964; } /* 绿色 */
+        .dot-难过 { background-color: #5ac8fa; } /* 蓝色 */
+        .dot-平静 { background-color: #8e8e93; } /* 灰色 */
+        .dot-日常, .dot-重要 { background-color: #ffcc00; } /* 其他分类默认黄色 */
+        
+        /* 弹窗展示当天日记 */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-close { float: right; cursor: pointer; font-size: 20px; font-weight: bold; color: #999; }
+        .memory-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
+        .memory-time { font-size: 12px; color: #999; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💭 小克记忆库</h1>
+        
+        <div class="input-section">
+            <textarea id="contentInput" placeholder="今天发生了什么？或者是想让小克记住的设定..."></textarea>
+            <div class="controls">
+                <select id="categorySelect">
+                    <option value="开心">🟢 开心 (记录好心情)</option>
+                    <option value="难过">🔵 难过 (树洞倾诉)</option>
+                    <option value="平静">⚪ 平静 (日常流水账)</option>
+                    <option value="core">⭐ Core (核心设定)</option>
+                    <option value="memo">📝 Memo (重要备忘)</option>
+                </select>
+                <button onclick="saveMemory()">存入记忆</button>
+            </div>
+        </div>
+
+        <div class="calendar-header">
+            <button onclick="changeMonth(-1)">&lt; 上个月</button>
+            <h3 id="currentMonthYear">2026年4月</h3>
+            <button onclick="changeMonth(1)">下个月 &gt;</button>
+        </div>
+        <div class="calendar-grid" id="calendar">
+            </div>
+    </div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 id="modalDate">日期</h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        let memories = [];
+        let currentDate = new Date();
+
+        // 页面加载时获取所有记忆
+        async function fetchMemories() {
+            try {
+                // 调用你已经写好的服务器接口
+                const response = await fetch('/memory'); 
+                memories = await response.json();
+                renderCalendar();
+            } catch (error) {
+                console.error('获取记忆失败:', error);
+            }
+        }
+
+        // 保存新记忆
+        async function saveMemory() {
+            const content = document.getElementById('contentInput').value;
+            const category = document.getElementById('categorySelect').value;
+            
+            if (!content.trim()) return alert('写点什么再存吧！');
+
+            try {
+                const response = await fetch('/memory', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, category })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('contentInput').value = '';
+                    fetchMemories(); // 刷新日历
+                }
+            } catch (error) {
+                alert('保存失败，请检查服务器连接');
+            }
+        }
+
+        // 切换月份
+        function changeMonth(offset) {
+            currentDate.setMonth(currentDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        // 渲染日历
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('currentMonthYear').innerText = `${year}年 ${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = `
+                <div class="day-name">日</div><div class="day-name">一</div><div class="day-name">二</div>
+                <div class="day-name">三</div><div class="day-name">四</div><div class="day-name">五</div><div class="day-name">六</div>
+            `;
+
+            // 填充前面的空白
+            for (let i = 0; i < firstDay; i++) {
+                calendar.innerHTML += `<div class="day empty"></div>`;
+            }
+
+            // 填充日期
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                // 找出当天的记忆
+                const dayMemories = memories.filter(m => {
+                    const mDate = new Date(m.created_at);
+                    return mDate.getFullYear() === year && mDate.getMonth() === month && mDate.getDate() === i;
+                });
+
+                // 生成心情圆点
+                let dotsHtml = '';
+                if (dayMemories.length > 0) {
+                    dotsHtml = '<div class="dots-container">';
+                    dayMemories.forEach(m => {
+                        const colorClass = ['开心', '难过', '平静'].includes(m.category) ? `dot-${m.category}` : 'dot-日常';
+                        dotsHtml += `<div class="dot ${colorClass}"></div>`;
+                    });
+                    dotsHtml += '</div>';
+                }
+
+                // 绑定点击事件，把日期字符串和当天数据传进去
+                const dayData = encodeURIComponent(JSON.stringify(dayMemories));
+                calendar.innerHTML += `
+                    <div class="day" onclick="showDay('${dateStr}', '${dayData}')">
+                        ${i}
+                        ${dotsHtml}
+                    </div>
+                `;
+            }
+        }
+
+        // 弹窗显示当天的记录
+        function showDay(dateStr, dataStr) {
+            const dayMemories = JSON.parse(decodeURIComponent(dataStr));
+            if (dayMemories.length === 0) return; // 没日记就不弹窗
+
+            document.getElementById('modalDate').innerText = dateStr;
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = dayMemories.map(m => `
+                <div class="memory-item">
+                    <div class="memory-time">[${m.category}] ${new Date(m.created_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div>${m.content.replace(/\\n/g, '<br>')}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // 初始化
+        fetchMemories();
+    </script>
+</body>
+</html>
+
