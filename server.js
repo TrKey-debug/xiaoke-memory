@@ -1,10 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// 开启网页服务
+app.use(express.static('public'));
 
 // 数据库连接池
 const pool = new Pool({
@@ -36,7 +40,7 @@ async function initDB() {
 initDB();
 
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', name: '小克记忆库(数据库版)', version: '2.0.0' });
+  res.json({ status: 'ok', name: '小克记忆库(最终网页版)', version: '3.0.0' });
 });
 
 const sseClients = new Set();
@@ -73,7 +77,7 @@ app.post('/messages', async (req, res) => {
       result: {
         protocolVersion: '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: '小克记忆库', version: '2.0.0' }
+        serverInfo: { name: '小克记忆库', version: '3.0.0' }
       }
     });
   }
@@ -86,19 +90,19 @@ app.post('/messages', async (req, res) => {
         tools: [
           {
             name: 'write_memory',
-            description: '写入一条记忆到小克记忆库',
+            description: '写入一条记忆',
             inputSchema: {
               type: 'object',
               properties: {
                 content: { type: 'string', description: '记忆内容' },
-                category: { type: 'string', description: '分类：日常/重要/日记' }
+                category: { type: 'string', description: '分类：日常/重要/日记/core/memo/daily' }
               },
               required: ['content']
             }
           },
           {
             name: 'read_memory',
-            description: '从小克记忆库读取记忆',
+            description: '读取记忆',
             inputSchema: {
               type: 'object',
               properties: {
@@ -124,7 +128,7 @@ app.post('/messages', async (req, res) => {
             inputSchema: {
               type: 'object',
               properties: {
-                 limit: { type: 'number', description: '返回最近几条记录，默认20' }
+                 limit: { type: 'number', description: '返回最近几条记录' }
               }
             }
           }
@@ -169,7 +173,7 @@ app.post('/messages', async (req, res) => {
 
         const queryRes = await pool.query(queryStr, queryParams);
         
-        // 🔥 核心瘦身：纯文本返回，丢掉大括号和时间戳
+        // 返回纯文本，省 token
         const texts = queryRes.rows.map(row => row.content);
         result = texts.length > 0 ? texts.join('\n') : '暂无相关记忆';
       }
@@ -189,7 +193,6 @@ app.post('/messages', async (req, res) => {
         result: { content: [{ type: 'text', text: JSON.stringify(result) }] }
       });
     } catch (e) {
-      console.error("Tool execution error:", e);
       return sendToClaude({
         jsonrpc: '2.0',
         id: message.id,
@@ -199,12 +202,54 @@ app.post('/messages', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`小克记忆库(数据库版)运行在端口 ${PORT}`);
+// REST API 用于网页和外部调用
+app.post('/memory', async (req, res) => {
+  try {
+    const { content, category } = req.body;
+    const cat = category || '日常';
+    const queryRes = await pool.query(
+      'INSERT INTO memories (content, category) VALUES ($1, $2) RETURNING *',
+      [content, cat]
+    );
+    res.json({ success: true, entry: queryRes.rows[0] });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.static('public')); // 👈 就是加上这行！
+app.get('/memory', async (req, res) => {
+  try {
+    const queryRes = await pool.query('SELECT * FROM memories ORDER BY created_at DESC');
+    res.json(queryRes.rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/activity/toggle/:app', async (req, res) => {
+  try {
+    const appName = req.params.app;
+    const lastRes = await pool.query(
+      'SELECT action FROM activities WHERE app = $1 ORDER BY time DESC LIMIT 1',
+      [appName]
+    );
+    
+    const lastAction = lastRes.rows.length > 0 ? lastRes.rows[0].action : 'close';
+    const newAction = lastAction === 'close' ? 'open' : 'close';
+    
+    const insertRes = await pool.query(
+      'INSERT INTO activities (app, action) VALUES ($1, $2) RETURNING *',
+      [appName, newAction]
+    );
+    
+    res.json({ success: true, entry: insertRes.rows[0] });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`小克记忆库运行在端口 ${PORT}`);
+});
+
