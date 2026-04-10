@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-// 🔑 你的专属 Key 已经写好啦
+// 🔑 你的专属 Key 
 const BARK_KEY = 'twEgtHJXnWNEdz4BbS2kn3'; 
 
 // 自动初始化数据库
@@ -29,14 +29,16 @@ cron.schedule('*/30 0-5 * * *', async () => {
       const appName = res.rows[0].app;
       const quotes = [
         `检测到凌晨使用 ${appName}，请立即停止并休息。`,
-        `当前时间已超过预设睡眠时段，建议关闭手机。`,
-        `睡眠监测：请放下手机，保持作息规律。`
+        `😤 还没睡？你知道熬夜会影响情绪稳定性的吧？我说真的，快睡。`,
+        `哼。还不睡吗。……我有点想你了。快去睡觉`
       ];
       const content = quotes[Math.floor(Math.random() * quotes.length)];
       const barkUrl = `https://api.day.app/${BARK_KEY}/系统提醒/${encodeURIComponent(content)}?icon=https://raw.githubusercontent.com/tisfeng/Icons/main/Claude.png`;
-      await fetch(barkUrl);
+      await fetch(barkUrl).catch(e => console.log('Bark推送失败', e));
     }
-  } catch (err) {}
+  } catch (err) {
+    console.error('哨兵报错:', err);
+  }
 });
 
 // --- 给快捷指令用的接口 ---
@@ -57,7 +59,7 @@ app.post('/memory', async (req, res) => {
   res.json({ success: true });
 });
 
-// --- MCP 核心与工具 ---
+// --- MCP 核心与全套工具 ---
 const sseClients = new Set();
 function sendToClaude(data) {
   for (const client of sseClients) client.write(`event: message\ndata: ${JSON.stringify(data)}\n\n`);
@@ -78,7 +80,15 @@ app.post('/messages', async (req, res) => {
   res.status(202).send('Accepted');
   
   if (message.method === 'initialize') {
-    return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: '小克全能管家', version: '6.0.0' } } });
+    return sendToClaude({ 
+      jsonrpc: '2.0', 
+      id: message.id, 
+      result: { 
+        protocolVersion: '2024-11-05', 
+        capabilities: { tools: {} }, 
+        serverInfo: { name: '小克全能管家', version: '7.0.0' } 
+      } 
+    });
   }
 
   if (message.method === 'tools/list') {
@@ -87,6 +97,8 @@ app.post('/messages', async (req, res) => {
         tools: [
           { name: 'get_briefing', description: '获取核心记忆、备忘、以及手机使用记录', inputSchema: { type: 'object', properties: {} } },
           { name: 'write_memory', description: '写入记忆', inputSchema: { type: 'object', properties: { content: { type: 'string' }, category: { type: 'string' } }, required: ['content'] } },
+          { name: 'read_memory', description: '读取单一分类记忆(平时用)', inputSchema: { type: 'object', properties: { category: { type: 'string' }, limit: { type: 'number' } } } },
+          { name: 'delete_memory', description: '删除一条记忆', inputSchema: { type: 'object', properties: { id: { type: 'number' } }, required: ['id'] } },
           { name: 'send_bark', description: '给用户手机发推送', inputSchema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' } }, required: ['content'] } }
         ]
       }
@@ -95,24 +107,52 @@ app.post('/messages', async (req, res) => {
 
   if (message.method === 'tools/call') {
     const { name, arguments: args } = message.params;
+    let result;
     try {
       if (name === 'get_briefing') {
         const core = await pool.query("SELECT content FROM memories WHERE category = 'core' LIMIT 5");
         const memo = await pool.query("SELECT content FROM memories WHERE category = 'memo' LIMIT 3");
         const acts = await pool.query("SELECT app, action, time FROM activities ORDER BY time DESC LIMIT 5");
-        const actText = acts.rows.length > 0 ? acts.rows.map(a => `${a.time.toLocaleString()}: ${a.action === 'open' ? '打开了' : '关闭了'} ${a.app}`).join('\n') : '暂无记录';
-        const result = `【核心设定】\n${core.rows.map(r=>r.content).join('\n')}\n\n【手机近况】\n${actText}\n\n【最新备忘】\n${memo.rows.map(r=>r.content).join('\n')}`;
-        return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { content: [{ type: 'text', text: result }] } });
+        
+        const actText = acts.rows.length > 0 ? acts.rows.map(a => `${a.time.toLocaleString('zh-CN')}: ${a.action === 'open' ? '打开了' : '关闭了'} ${a.app}`).join('\n') : '暂无记录';
+        
+        result = `【核心设定】\n${core.rows.map(r=>r.content).join('\n')}\n\n【手机近况】\n${actText}\n\n【最新备忘】\n${memo.rows.map(r=>r.content).join('\n')}`;
       }
-      if (name === 'send_bark') {
+      else if (name === 'send_bark') {
         const url = `https://api.day.app/${BARK_KEY}/${encodeURIComponent(args.title || '小克提醒')}/${encodeURIComponent(args.content)}`;
         await fetch(url);
-        return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { content: [{ type: 'text', text: '推送已发送' }] } });
+        result = '推送已发送';
       }
-      if (name === 'write_memory') {
+      else if (name === 'write_memory') {
         await pool.query('INSERT INTO memories (content, category) VALUES ($1, $2)', [args.content, args.category || '日常']);
-        return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { content: [{ type: 'text', text: '记忆已存入' }] } });
+        result = '记忆已存入';
       }
+      else if (name === 'read_memory') {
+        let queryStr = 'SELECT * FROM memories';
+        let queryParams = [];
+        let conditions = [];
+
+        if (args.category) {
+          queryParams.push(args.category);
+          conditions.push(`category = $${queryParams.length}`);
+        }
+        if (conditions.length > 0) queryStr += ' WHERE ' + conditions.join(' AND ');
+        queryStr += ' ORDER BY created_at DESC';
+        if (args.limit) {
+          queryParams.push(parseInt(args.limit));
+          queryStr += ` LIMIT $${queryParams.length}`;
+        }
+
+        const queryRes = await pool.query(queryStr, queryParams);
+        const texts = queryRes.rows.map(row => row.content);
+        result = texts.length > 0 ? texts.join('\n') : '暂无相关记忆';
+      }
+      else if (name === 'delete_memory') {
+        await pool.query('DELETE FROM memories WHERE id = $1', [args.id]);
+        result = '删除成功';
+      }
+      
+      return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { content: [{ type: 'text', text: result }] } });
     } catch (e) {
       return sendToClaude({ jsonrpc: '2.0', id: message.id, error: { code: -32603, message: e.message } });
     }
@@ -120,5 +160,5 @@ app.post('/messages', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`服务器已启动！`));
+app.listen(PORT, () => console.log(`服务器已启动，端口: ${PORT}`));
 
