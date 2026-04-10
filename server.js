@@ -204,3 +204,7 @@ app.listen(PORT, () => {
   console.log(`小克记忆库(数据库版)运行在端口 ${PORT}`);
 });
 
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public')); // 👈 就是加上这行！
