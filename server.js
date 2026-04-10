@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const path = require('path');
-const cron = require('node-cron'); // 新增：定时器模块
+const cron = require('node-cron');
 
 const app = express();
 app.use(cors());
@@ -16,7 +16,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const BARK_KEY = 'twEgtHJXnWNEdz4BbS2kn3'; // 新增：你的 Bark Key
+const BARK_KEY = 'twEgtHJXnWNEdz4BbS2kn3'; 
 
 // 自动初始化数据库表
 async function initDB() {
@@ -42,7 +42,7 @@ async function initDB() {
 }
 initDB();
 
-// --- 哨兵巡逻 (新增) ---
+// --- 哨兵巡逻 (克制冷静版) ---
 cron.schedule('*/30 0-5 * * *', async () => {
   try {
     const res = await pool.query("SELECT app FROM activities WHERE action = 'open' AND time > NOW() - INTERVAL '30 minutes' LIMIT 1");
@@ -50,8 +50,10 @@ cron.schedule('*/30 0-5 * * *', async () => {
       const appName = res.rows[0].app;
       const quotes = [
         `检测到凌晨使用 ${appName}，请立即停止并休息。`,
-        `哼。还不睡吗。……我有点想你了。去睡觉`,
-        `😮‍💨你看看现在几点了。我没办法替你睡觉。所以你自己去吧`
+        `哼。还不睡吗。……我有点想你了。去睡觉。`,
+        `😤 还没睡？你知道熬夜会影响情绪稳定性的吧。我说真的。去睡。`
+        `现在是 ${appName}点。睡眠是最便宜的药。晚安。`
+        `😮‍💨 你看看现在几点了。我没办法替你睡觉。所以你自己去吧。`
       ];
       const content = quotes[Math.floor(Math.random() * quotes.length)];
       const barkUrl = `https://api.day.app/${BARK_KEY}/系统提醒/${encodeURIComponent(content)}?icon=https://raw.githubusercontent.com/tisfeng/Icons/main/Claude.png`;
@@ -59,6 +61,16 @@ cron.schedule('*/30 0-5 * * *', async () => {
     }
   } catch (err) {
     console.error('哨兵报错:', err);
+  }
+});
+
+// --- 自动保洁 (每天凌晨4点清理30天前的手机记录，不碰日记) ---
+cron.schedule('0 4 * * *', async () => {
+  try {
+    await pool.query("DELETE FROM activities WHERE time < NOW() - INTERVAL '30 days'");
+    console.log('自动清理完毕，已删除旧手机记录。');
+  } catch (err) {
+    console.error('清理数据报错:', err);
   }
 });
 
@@ -151,7 +163,6 @@ app.post('/messages', async (req, res) => {
             }
           },
           {
-            // 新增
             name: 'send_bark',
             description: '给用户发推送',
             inputSchema: {
@@ -177,7 +188,6 @@ app.post('/messages', async (req, res) => {
         const coreRes = await pool.query("SELECT content FROM memories WHERE category = 'core' ORDER BY created_at ASC LIMIT 10");
         const memoRes = await pool.query("SELECT content FROM memories WHERE category = 'memo' ORDER BY created_at DESC LIMIT 4");
         const dailyRes = await pool.query("SELECT content FROM memories WHERE category = 'daily' ORDER BY created_at DESC LIMIT 3");
-        // 新增手机记录查询
         const actsRes = await pool.query("SELECT app, action, time FROM activities ORDER BY time DESC LIMIT 5");
 
         const formatRes = (res) => res.rows.length > 0 ? res.rows.map(r => r.content).join('\n') : '暂无';
@@ -218,7 +228,6 @@ app.post('/messages', async (req, res) => {
         result = { success: true };
       }
       else if (name === 'send_bark') {
-        // 新增
         const url = `https://api.day.app/${BARK_KEY}/${encodeURIComponent(args.title || '小克提醒')}/${encodeURIComponent(args.content)}`;
         await fetch(url).catch(e => console.log(e));
         result = '推送已发送';
@@ -239,7 +248,6 @@ app.post('/messages', async (req, res) => {
   }
 });
 
-// --- 给快捷指令用的接口 (新增) ---
 app.post('/activity/report', async (req, res) => {
   try {
     const { app_name, action } = req.body;
@@ -250,7 +258,6 @@ app.post('/activity/report', async (req, res) => {
   }
 });
 
-// REST API 用于网页和外部调用
 app.post('/memory', async (req, res) => {
   try {
     const { content, category } = req.body;
