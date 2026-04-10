@@ -40,7 +40,7 @@ async function initDB() {
 initDB();
 
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', name: '小克记忆库(最终网页版)', version: '3.0.0' });
+  res.json({ status: 'ok', name: '小克记忆库(Briefing版)', version: '4.0.0' });
 });
 
 const sseClients = new Set();
@@ -77,7 +77,7 @@ app.post('/messages', async (req, res) => {
       result: {
         protocolVersion: '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: '小克记忆库', version: '3.0.0' }
+        serverInfo: { name: '小克记忆库', version: '4.0.0' }
       }
     });
   }
@@ -88,6 +88,12 @@ app.post('/messages', async (req, res) => {
       id: message.id,
       result: {
         tools: [
+          {
+            // 🔥 新增的超级简报 API！
+            name: 'get_briefing',
+            description: '新对话启动专用。一次性获取最新的核心设定(core)、备忘(memo)和日常近况(daily)。',
+            inputSchema: { type: 'object', properties: {} }
+          },
           {
             name: 'write_memory',
             description: '写入一条记忆',
@@ -102,7 +108,7 @@ app.post('/messages', async (req, res) => {
           },
           {
             name: 'read_memory',
-            description: '读取记忆',
+            description: '读取单一分类记忆(平时用)',
             inputSchema: {
               type: 'object',
               properties: {
@@ -121,16 +127,6 @@ app.post('/messages', async (req, res) => {
               },
               required: ['id']
             }
-          },
-          {
-            name: 'read_activity',
-            description: '读取手机使用记录',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                 limit: { type: 'number', description: '返回最近几条记录' }
-              }
-            }
           }
         ]
       }
@@ -142,7 +138,19 @@ app.post('/messages', async (req, res) => {
     let result;
     
     try {
-      if (name === 'write_memory') {
+      // 🔥 Briefing API 的执行逻辑
+      if (name === 'get_briefing') {
+        // 在服务器端强制写死条数，防止 Claude 乱要数据
+        const coreRes = await pool.query("SELECT content FROM memories WHERE category = 'core' ORDER BY created_at ASC LIMIT 10");
+        const memoRes = await pool.query("SELECT content FROM memories WHERE category = 'memo' ORDER BY created_at DESC LIMIT 4");
+        const dailyRes = await pool.query("SELECT content FROM memories WHERE category = 'daily' ORDER BY created_at DESC LIMIT 3");
+        
+        const formatRes = (res) => res.rows.length > 0 ? res.rows.map(r => r.content).join('\n') : '暂无';
+        
+        // 打包成极致省 token 的纯文本
+        result = `【Core 核心设定】\n${formatRes(coreRes)}\n\n【Memo 最新备忘】\n${formatRes(memoRes)}\n\n【Daily 最近状况】\n${formatRes(dailyRes)}`;
+      }
+      else if (name === 'write_memory') {
         const cat = args.category || '日常';
         const queryRes = await pool.query(
           'INSERT INTO memories (content, category) VALUES ($1, $2) RETURNING *',
@@ -159,32 +167,20 @@ app.post('/messages', async (req, res) => {
           queryParams.push(args.category);
           conditions.push(`category = $${queryParams.length}`);
         }
-        
-        if (conditions.length > 0) {
-          queryStr += ' WHERE ' + conditions.join(' AND ');
-        }
-        
+        if (conditions.length > 0) queryStr += ' WHERE ' + conditions.join(' AND ');
         queryStr += ' ORDER BY created_at DESC';
-        
         if (args.limit) {
           queryParams.push(parseInt(args.limit));
           queryStr += ` LIMIT $${queryParams.length}`;
         }
 
         const queryRes = await pool.query(queryStr, queryParams);
-        
-        // 返回纯文本，省 token
         const texts = queryRes.rows.map(row => row.content);
         result = texts.length > 0 ? texts.join('\n') : '暂无相关记忆';
       }
       else if (name === 'delete_memory') {
         await pool.query('DELETE FROM memories WHERE id = $1', [args.id]);
         result = { success: true };
-      }
-      else if (name === 'read_activity') {
-        const limit = args.limit || 20;
-        const queryRes = await pool.query('SELECT * FROM activities ORDER BY time DESC LIMIT $1', [limit]);
-        result = queryRes.rows;
       }
       
       return sendToClaude({
@@ -221,28 +217,6 @@ app.get('/memory', async (req, res) => {
   try {
     const queryRes = await pool.query('SELECT * FROM memories ORDER BY created_at DESC');
     res.json(queryRes.rows);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.get('/activity/toggle/:app', async (req, res) => {
-  try {
-    const appName = req.params.app;
-    const lastRes = await pool.query(
-      'SELECT action FROM activities WHERE app = $1 ORDER BY time DESC LIMIT 1',
-      [appName]
-    );
-    
-    const lastAction = lastRes.rows.length > 0 ? lastRes.rows[0].action : 'close';
-    const newAction = lastAction === 'close' ? 'open' : 'close';
-    
-    const insertRes = await pool.query(
-      'INSERT INTO activities (app, action) VALUES ($1, $2) RETURNING *',
-      [appName, newAction]
-    );
-    
-    res.json({ success: true, entry: insertRes.rows[0] });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
