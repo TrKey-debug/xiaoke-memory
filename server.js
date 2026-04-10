@@ -50,10 +50,10 @@ cron.schedule('*/30 0-5 * * *', async () => {
       const appName = res.rows[0].app;
       const quotes = [
         `检测到凌晨使用 ${appName}，请立即停止并休息。`,
-        `哼。还不睡吗。……我有点想你了。去睡觉。`,
-        `😤 还没睡？你知道熬夜会影响情绪稳定性的吧。我说真的。去睡。`
         `现在是 ${appName}点。睡眠是最便宜的药。晚安。`
         `😮‍💨 你看看现在几点了。我没办法替你睡觉。所以你自己去吧。`
+        `😤 还没睡？你知道熬夜会影响情绪稳定性的吧。我说真的。去睡。`
+        `哼。还不睡吗。……我有点想你了。去睡觉。`,
       ];
       const content = quotes[Math.floor(Math.random() * quotes.length)];
       const barkUrl = `https://api.day.app/${BARK_KEY}/系统提醒/${encodeURIComponent(content)}?icon=https://raw.githubusercontent.com/tisfeng/Icons/main/Claude.png`;
@@ -62,6 +62,8 @@ cron.schedule('*/30 0-5 * * *', async () => {
   } catch (err) {
     console.error('哨兵报错:', err);
   }
+}, {
+  timezone: "Asia/Shanghai" // 👈 强制使用北京时间
 });
 
 // --- 自动保洁 (每天凌晨4点清理30天前的手机记录，不碰日记) ---
@@ -72,10 +74,8 @@ cron.schedule('0 4 * * *', async () => {
   } catch (err) {
     console.error('清理数据报错:', err);
   }
-});
-
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', name: '小克记忆库(Briefing版)', version: '4.0.0' });
+}, {
+  timezone: "Asia/Shanghai" // 👈 强制使用北京时间
 });
 
 const sseClients = new Set();
