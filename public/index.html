@@ -1,178 +1,174 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小克的角落</title>
 <style>
-
-
 :root {
-–bg: #0d1117;
-–bg2: #111820;
-–surface: #1a2332;
-–surface2: #1f2b3d;
-–border: rgba(100, 160, 220, 0.12);
-–border2: rgba(100, 160, 220, 0.06);
-–text: #c8d8e8;
-–text-dim: #6a8aaa;
-–text-dimmer: #3a5a7a;
-–accent: #7ab3d4;
-–accent2: #4a8fb8;
-–accent-glow: rgba(122, 179, 212, 0.15);
-–ink: #e8f0f8;
---font-serif: 'PingFang SC', 'Microsoft YaHei', 'STSong', serif;
---font-display: 'PingFang SC', 'STKaiti', 'KaiTi', serif;
---font-latin: Georgia, 'Times New Roman', serif;
-
+    --bg: #0d1117;
+    --bg2: #111820;
+    --surface: #1a2332;
+    --surface2: #1f2b3d;
+    --border: rgba(100, 160, 220, 0.12);
+    --border2: rgba(100, 160, 220, 0.06);
+    --text: #c8d8e8;
+    --text-dim: #6a8aaa;
+    --text-dimmer: #3a5a7a;
+    --accent: #7ab3d4;
+    --accent2: #4a8fb8;
+    --accent-glow: rgba(122, 179, 212, 0.15);
+    --ink: #e8f0f8;
+    --font-serif: 'PingFang SC', 'Microsoft YaHei', 'STSong', serif;
+    --font-display: 'PingFang SC', 'STKaiti', 'KaiTi', serif;
+    --font-latin: Georgia, 'Times New Roman', serif;
 }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+/* 修复了此处的通配符选择器 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-background: var(–bg);
-color: var(–text);
-font-family: var(–font-serif);
-min-height: 100vh;
-overflow-x: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-serif);
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 body::before {
-content: ‘’;
-position: fixed; inset: 0;
-background-image:
-radial-gradient(1px 1px at 15% 20%, rgba(200,220,255,0.4) 0%, transparent 100%),
-radial-gradient(1px 1px at 35% 60%, rgba(200,220,255,0.3) 0%, transparent 100%),
-radial-gradient(1.5px 1.5px at 55% 15%, rgba(200,220,255,0.35) 0%, transparent 100%),
-radial-gradient(1px 1px at 75% 45%, rgba(200,220,255,0.25) 0%, transparent 100%),
-radial-gradient(1px 1px at 88% 80%, rgba(200,220,255,0.3) 0%, transparent 100%),
-radial-gradient(1px 1px at 25% 85%, rgba(200,220,255,0.2) 0%, transparent 100%),
-radial-gradient(1px 1px at 65% 70%, rgba(200,220,255,0.25) 0%, transparent 100%),
-radial-gradient(1.5px 1.5px at 92% 25%, rgba(200,220,255,0.3) 0%, transparent 100%),
-radial-gradient(1px 1px at 45% 40%, rgba(200,220,255,0.2) 0%, transparent 100%),
-radial-gradient(1px 1px at 8% 55%, rgba(200,220,255,0.25) 0%, transparent 100%);
-pointer-events: none; z-index: 0;
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+        radial-gradient(1px 1px at 15% 20%, rgba(200,220,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 60%, rgba(200,220,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 15%, rgba(200,220,255,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 45%, rgba(200,220,255,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 80%, rgba(200,220,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 85%, rgba(200,220,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 70%, rgba(200,220,255,0.25) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 92% 25%, rgba(200,220,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 40%, rgba(200,220,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 8% 55%, rgba(200,220,255,0.25) 0%, transparent 100%);
+    pointer-events: none; z-index: 0;
 }
 
 body::after {
-content: ‘’;
-position: fixed; top: -200px; left: 50%;
-transform: translateX(-50%);
-width: 800px; height: 400px;
-background: radial-gradient(ellipse, rgba(74,143,184,0.08) 0%, transparent 70%);
-pointer-events: none; z-index: 0;
+    content: '';
+    position: fixed; top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(74,143,184,0.08) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
 }
 
 .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 
-header { padding: 48px 0 32px; border-bottom: 1px solid var(–border2); }
+header { padding: 48px 0 32px; border-bottom: 1px solid var(--border2); }
 .header-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
-.site-title { font-family: var(–font-display); font-size: 28px; color: var(–ink); letter-spacing: 0.08em; line-height: 1; }
-.site-title span { color: var(–accent); }
-.site-subtitle { font-family: var(–font-latin); font-style: italic; font-size: 14px; color: var(–text-dim); letter-spacing: 0.04em; margin-top: 8px; }
-.header-date { text-align: right; font-size: 12px; color: var(–text-dimmer); letter-spacing: 0.06em; }
+.site-title { font-family: var(--font-display); font-size: 28px; color: var(--ink); letter-spacing: 0.08em; line-height: 1; }
+.site-title span { color: var(--accent); }
+.site-subtitle { font-family: var(--font-latin); font-style: italic; font-size: 14px; color: var(--text-dim); letter-spacing: 0.04em; margin-top: 8px; }
+.header-date { text-align: right; font-size: 12px; color: var(--text-dimmer); letter-spacing: 0.06em; }
 
-nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(–border2); }
-.nav-btn { background: none; border: none; color: var(–text-dim); font-family: var(–font-serif); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; letter-spacing: 0.04em; transition: all 0.2s; position: relative; }
-.nav-btn:hover { color: var(–text); background: var(–accent-glow); }
-.nav-btn.active { color: var(–accent); background: var(–accent-glow); }
-.nav-btn.active::after { content: ‘’; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(–accent); }
+nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--border2); }
+.nav-btn { background: none; border: none; color: var(--text-dim); font-family: var(--font-serif); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; letter-spacing: 0.04em; transition: all 0.2s; position: relative; }
+.nav-btn:hover { color: var(--text); background: var(--accent-glow); }
+.nav-btn.active { color: var(--accent); background: var(--accent-glow); }
+.nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--accent); }
 
-.mood-section { padding: 32px 0 24px; border-bottom: 1px solid var(–border2); }
-.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(–text-dimmer); text-transform: uppercase; margin-bottom: 16px; }
+.mood-section { padding: 32px 0 24px; border-bottom: 1px solid var(--border2); }
+.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; }
 .mood-chart { height: 80px; display: flex; align-items: flex-end; gap: 8px; }
 .mood-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mood-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; height: 56px; }
 .mood-bar { width: 6px; border-radius: 3px; transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
-.mood-bar::after { content: ‘’; position: absolute; inset: 0; border-radius: 3px; opacity: 0.4; filter: blur(4px); background: inherit; }
+.mood-bar::after { content: ''; position: absolute; inset: 0; border-radius: 3px; opacity: 0.4; filter: blur(4px); background: inherit; }
 .mood-bar:hover { transform: scaleX(1.5); cursor: pointer; }
-.mood-date-label { font-size: 10px; color: var(–text-dimmer); letter-spacing: 0.04em; }
+.mood-date-label { font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.04em; }
 
 .main-layout { display: grid; grid-template-columns: 240px 1fr; gap: 0; min-height: 600px; }
-.timeline { border-right: 1px solid var(–border2); padding: 32px 24px 32px 0; }
+.timeline { border-right: 1px solid var(--border2); padding: 32px 24px 32px 0; }
 .timeline-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
-.timeline-item:hover { background: var(–accent-glow); }
-.timeline-item.active { background: var(–accent-glow); border: 1px solid var(–border); }
-.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(–text-dimmer); margin-top: 5px; flex-shrink: 0; transition: all 0.2s; }
-.timeline-item.active .timeline-dot, .timeline-item:hover .timeline-dot { background: var(–accent); box-shadow: 0 0 8px rgba(122,179,212,0.6); }
+.timeline-item:hover { background: var(--accent-glow); }
+.timeline-item.active { background: var(--accent-glow); border: 1px solid var(--border); }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dimmer); margin-top: 5px; flex-shrink: 0; transition: all 0.2s; }
+.timeline-item.active .timeline-dot, .timeline-item:hover .timeline-dot { background: var(--accent); box-shadow: 0 0 8px rgba(122,179,212,0.6); }
 .timeline-info { flex: 1; min-width: 0; }
-.timeline-date { font-size: 12px; color: var(–text-dim); letter-spacing: 0.04em; }
-.timeline-preview { font-size: 12px; color: var(–text-dimmer); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score-badge-sm { font-size: 11px; font-family: var(–font-latin); flex-shrink: 0; margin-top: 4px; }
+.timeline-date { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; }
+.timeline-preview { font-size: 12px; color: var(--text-dimmer); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.score-badge-sm { font-size: 11px; font-family: var(--font-latin); flex-shrink: 0; margin-top: 4px; }
 
 .content-area { padding: 32px 0 32px 32px; }
-.diary-card { background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; animation: fadeUp 0.4s ease both; }
+.diary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; animation: fadeUp 0.4s ease both; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-.diary-card::before { content: ‘’; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
-.diary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(–border2); }
-.diary-date-full { font-family: var(–font-latin); font-style: italic; font-size: 18px; color: var(–text-dim); }
-.score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.06em; background: rgba(122,179,212,0.1); color: var(–accent); border: 1px solid rgba(122,179,212,0.25); font-family: var(–font-latin); }
-.diary-body { font-size: 15px; line-height: 2; color: var(–ink); font-weight: 300; white-space: pre-wrap; position: relative; z-index: 1; }
+.diary-card::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
+.diary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border2); }
+.diary-date-full { font-family: var(--font-latin); font-style: italic; font-size: 18px; color: var(--text-dim); }
+.score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.06em; background: rgba(122,179,212,0.1); color: var(--accent); border: 1px solid rgba(122,179,212,0.25); font-family: var(--font-latin); }
+.diary-body { font-size: 15px; line-height: 2; color: var(--ink); font-weight: 300; white-space: pre-wrap; position: relative; z-index: 1; }
 
-.memory-item { padding: 20px 0; border-bottom: 1px solid var(–border2); animation: fadeUp 0.3s ease both; }
+.memory-item { padding: 20px 0; border-bottom: 1px solid var(--border2); animation: fadeUp 0.3s ease both; }
 .memory-item:last-child { border-bottom: none; }
 .memory-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.memory-tag { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(–accent2); background: rgba(74,143,184,0.1); padding: 2px 8px; border-radius: 10px; }
-.memory-time { font-size: 11px; color: var(–text-dimmer); font-family: var(–font-latin); font-style: italic; }
-.memory-content { font-size: 14px; line-height: 1.8; color: var(–text); font-weight: 300; }
+.memory-tag { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); background: rgba(74,143,184,0.1); padding: 2px 8px; border-radius: 10px; }
+.memory-time { font-size: 11px; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; }
+.memory-content { font-size: 14px; line-height: 1.8; color: var(--text); font-weight: 300; }
 
-.write-card { background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; }
-.write-card::before { content: ‘’; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
-.write-label { font-size: 11px; letter-spacing: 0.12em; color: var(–text-dimmer); text-transform: uppercase; margin-bottom: 20px; }
+.write-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; }
+.write-card::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
+.write-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 20px; }
 
 .score-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-.score-label { font-size: 12px; color: var(–text-dim); letter-spacing: 0.04em; }
-.score-slider { -webkit-appearance: none; appearance: none; width: 200px; height: 3px; border-radius: 2px; background: var(–border); outline: none; cursor: pointer; }
-.score-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(–accent); cursor: pointer; box-shadow: 0 0 6px rgba(122,179,212,0.5); }
-.score-display { font-size: 20px; color: var(–accent); font-family: var(–font-latin); min-width: 28px; transition: color 0.2s; }
+.score-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; }
+.score-slider { -webkit-appearance: none; appearance: none; width: 200px; height: 3px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
+.score-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(122,179,212,0.5); }
+.score-display { font-size: 20px; color: var(--accent); font-family: var(--font-latin); min-width: 28px; transition: color 0.2s; }
 
-textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(–ink); font-family: var(–font-serif); font-size: 15px; line-height: 2; resize: none; position: relative; z-index: 1; }
-textarea::placeholder { color: var(–text-dimmer); }
-.write-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(–border2); }
-.char-count { font-size: 11px; color: var(–text-dimmer); font-family: var(–font-latin); font-style: italic; }
-.submit-btn { background: none; border: 1px solid var(–accent); color: var(–accent); font-family: var(–font-serif); font-size: 13px; padding: 8px 24px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
-.submit-btn:hover { background: var(–accent-glow); box-shadow: 0 0 16px rgba(122,179,212,0.2); }
+textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; resize: none; position: relative; z-index: 1; }
+textarea::placeholder { color: var(--text-dimmer); }
+.write-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border2); }
+.char-count { font-size: 11px; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; }
+.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font-serif); font-size: 13px; padding: 8px 24px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
+.submit-btn:hover { background: var(--accent-glow); box-shadow: 0 0 16px rgba(122,179,212,0.2); }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* 其他样式保持一致，已统一修复变量引用 */
 .letter-corner { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
-.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(–surface2); border: 1px solid var(–border); color: var(–accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-.letter-btn:hover { border-color: var(–accent); box-shadow: 0 4px 20px rgba(122,179,212,0.2); transform: scale(1.05); }
-.letter-panel { position: absolute; bottom: 56px; right: 0; width: 300px; background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 20px; display: none; animation: fadeUp 0.25s ease both; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.letter-btn:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(122,179,212,0.2); transform: scale(1.05); }
+.letter-panel { position: absolute; bottom: 56px; right: 0; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: none; animation: fadeUp 0.25s ease both; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
 .letter-panel.open { display: block; }
-.letter-panel-title { font-size: 12px; color: var(–text-dim); letter-spacing: 0.06em; margin-bottom: 12px; font-family: var(–font-latin); font-style: italic; }
-.letter-textarea { width: 100%; min-height: 100px; background: var(–bg2); border: 1px solid var(–border2); border-radius: 4px; color: var(–ink); font-family: var(–font-serif); font-size: 13px; line-height: 1.8; padding: 10px 12px; resize: none; outline: none; }
-.letter-textarea::placeholder { color: var(–text-dimmer); }
-.letter-send { width: 100%; margin-top: 10px; background: none; border: 1px solid var(–border); color: var(–text-dim); font-family: var(–font-serif); font-size: 12px; padding: 7px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
-.letter-send:hover { border-color: var(–accent); color: var(–accent); }
+.letter-panel-title { font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; margin-bottom: 12px; font-family: var(--font-latin); font-style: italic; }
+.letter-textarea { width: 100%; min-height: 100px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 4px; color: var(--ink); font-family: var(--font-serif); font-size: 13px; line-height: 1.8; padding: 10px 12px; resize: none; outline: none; }
+.letter-textarea::placeholder { color: var(--text-dimmer); }
+.letter-send { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--font-serif); font-size: 12px; padding: 7px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
+.letter-send:hover { border-color: var(--accent); color: var(--accent); }
 
-.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(–surface2); border: 1px solid var(–border); color: var(–accent); font-family: var(–font-serif); font-size: 13px; padding: 10px 24px; border-radius: 4px; letter-spacing: 0.06em; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; }
+.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-family: var(--font-serif); font-size: 13px; padding: 10px 24px; border-radius: 4px; letter-spacing: 0.06em; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 .stamp-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 300; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
 .stamp-overlay.show { opacity: 1; }
-.stamp { font-family: var(–font-display); font-size: 72px; color: var(–accent); border: 4px solid var(–accent); padding: 12px 24px; border-radius: 4px; opacity: 0.7; transform: rotate(-12deg); letter-spacing: 0.1em; box-shadow: 0 0 40px rgba(122,179,212,0.3); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+.stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; opacity: 0.7; transform: rotate(-12deg); letter-spacing: 0.1em; box-shadow: 0 0 40px rgba(122,179,212,0.3); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
 @keyframes stampIn { from { transform: rotate(-12deg) scale(2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 0.7; } }
 
-.empty-state { text-align: center; padding: 80px 0; color: var(–text-dimmer); font-family: var(–font-latin); font-style: italic; font-size: 16px; line-height: 2; }
-.loading { text-align: center; padding: 60px 0; color: var(–text-dimmer); font-size: 13px; letter-spacing: 0.06em; }
+.empty-state { text-align: center; padding: 80px 0; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; font-size: 16px; line-height: 2; }
+.loading { text-align: center; padding: 60px 0; color: var(--text-dimmer); font-size: 13px; letter-spacing: 0.06em; }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(–border); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 @media (max-width: 640px) {
-.main-layout { grid-template-columns: 1fr; }
-.timeline { border-right: none; border-bottom: 1px solid var(–border2); padding: 24px 0; }
-.content-area { padding: 24px 0 0; }
-.header-inner { flex-direction: column; align-items: flex-start; }
-.letter-corner { bottom: 20px; right: 20px; }
+    .main-layout { grid-template-columns: 1fr; }
+    .timeline { border-right: none; border-bottom: 1px solid var(--border2); padding: 24px 0; }
+    .content-area { padding: 24px 0 0; }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .letter-corner { bottom: 20px; right: 20px; }
 }
 </style>
-
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 <div class="stamp-overlay" id="stampOverlay"><div class="stamp">已保存</div></div>
 
@@ -239,10 +235,7 @@ textarea::placeholder { color: var(–text-dimmer); }
 </div>
 
 <script>
-  // 数据说明：所有数据走 /memory 接口
-  // category 以 "mood-" 开头 → 日记，如 mood-8 = 心情8分
-  // 其他 category → 记忆条目
-
+  // JS 逻辑部分保持不变，确保渲染正常
   let diaries = [];
   let memories = [];
   let selectedDiaryIndex = null;
@@ -269,7 +262,8 @@ textarea::placeholder { color: var(–text-dimmer); }
 
   async function init() {
     updateHeaderDate();
-    document.getElementById('writeDate').textContent = formatDate(new Date());
+    const writeDateEl = document.getElementById('writeDate');
+    if(writeDateEl) writeDateEl.textContent = formatDate(new Date());
     await loadAll();
     renderMoodChart();
     renderTimeline();
@@ -364,12 +358,16 @@ textarea::placeholder { color: var(–text-dimmer); }
   function updateHeaderDate() {
     const now = new Date();
     const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    document.getElementById('headerDate').innerHTML =
+    const headerDateEl = document.getElementById('headerDate');
+    if(headerDateEl) {
+        headerDateEl.innerHTML =
       `${now.getFullYear()} · ${String(now.getMonth()+1).padStart(2,'0')} · ${String(now.getDate()).padStart(2,'0')}<br>${days[now.getDay()]}`;
+    }
   }
 
   function renderMoodChart() {
     const chart = document.getElementById('moodChart');
+    if(!chart) return;
     chart.innerHTML = '';
     getLast7Days().forEach(date => {
       const entry = diaries.find(d => d.date === date);
@@ -397,6 +395,7 @@ textarea::placeholder { color: var(–text-dimmer); }
 
   function renderTimeline() {
     const tl = document.getElementById('timeline');
+    if(!tl) return;
     if (diaries.length === 0) {
       tl.innerHTML = '<div style="color:var(--text-dimmer);font-size:12px;padding:12px 0;">还没有日记</div>';
       return;
@@ -415,7 +414,9 @@ textarea::placeholder { color: var(–text-dimmer); }
   function showDiary(index) {
     selectedDiaryIndex = index;
     const d = diaries[index];
-    document.getElementById('contentArea').innerHTML = `
+    const contentArea = document.getElementById('contentArea');
+    if(!contentArea) return;
+    contentArea.innerHTML = `
       <div class="diary-card">
         <div class="diary-header">
           <div class="diary-date-full">${formatDate(d.date)}</div>
@@ -430,6 +431,7 @@ textarea::placeholder { color: var(–text-dimmer); }
 
   function renderMemories() {
     const list = document.getElementById('memoryList');
+    if(!list) return;
     if (memories.length === 0) {
       list.innerHTML = '<div class="empty-state">记忆库是空的</div>';
       return;
@@ -447,32 +449,48 @@ textarea::placeholder { color: var(–text-dimmer); }
   function switchTab(tab, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    ['diary','memory','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
-    document.getElementById('moodSection').style.display = tab === 'write' ? 'none' : 'block';
-    document.getElementById(tab+'Tab').style.display = 'block';
+    ['diary','memory','write'].forEach(t => {
+        const el = document.getElementById(t+'Tab');
+        if(el) el.style.display = 'none';
+    });
+    const moodSec = document.getElementById('moodSection');
+    if(moodSec) moodSec.style.display = tab === 'write' ? 'none' : 'block';
+    const targetTab = document.getElementById(tab+'Tab');
+    if(targetTab) targetTab.style.display = 'block';
   }
 
   function updateScore() {
-    currentScore = parseInt(document.getElementById('scoreSlider').value);
+    const slider = document.getElementById('scoreSlider');
+    if(!slider) return;
+    currentScore = parseInt(slider.value);
     const display = document.getElementById('scoreDisplay');
-    display.textContent = currentScore;
-    display.style.color = scoreColor(currentScore);
+    if(display) {
+        display.textContent = currentScore;
+        display.style.color = scoreColor(currentScore);
+    }
   }
 
   function updateCount() {
-    document.getElementById('charCount').textContent = `${document.getElementById('diaryInput').value.length} 字`;
+    const input = document.getElementById('diaryInput');
+    const count = document.getElementById('charCount');
+    if(input && count) count.textContent = `${input.value.length} 字`;
   }
 
-  function toggleLetter() { document.getElementById('letterPanel').classList.toggle('open'); }
+  function toggleLetter() { 
+      const panel = document.getElementById('letterPanel');
+      if(panel) panel.classList.toggle('open'); 
+  }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
+    if(!t) return;
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
   function showStamp() {
     const o = document.getElementById('stampOverlay');
+    if(!o) return;
     o.classList.add('show');
     setTimeout(() => o.classList.remove('show'), 1200);
   }
