@@ -25,7 +25,7 @@ async function initDB() {
 initDB();
 
 // --- 哨兵巡逻 (全天候测试排错版) ---
-cron.schedule('* * * * *', async () => {
+cron.schedule('* /30 0-5 * * *', async () => {
   console.log('【哨兵】正在查库...');
   try {
     const res = await pool.query("SELECT app FROM activities WHERE action = 'open' AND time > NOW() - INTERVAL '30 minutes' LIMIT 1");
