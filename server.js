@@ -1,95 +1,89 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-const path = require('path');
 const cron = require('node-cron');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// 开启网页服务
 app.use(express.static('public'));
 
-// 数据库连接池
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const BARK_KEY = 'twEgtHJXnWNEdz4BbS2kn3'; 
+const BARK_KEY = 'twEgtHJXnWNEdz4BbS2kn3';
 
-// 自动初始化数据库表
 async function initDB() {
   try {
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS memories (
-        id SERIAL PRIMARY KEY,
-        content TEXT NOT NULL,
-        category VARCHAR(50) DEFAULT '日常',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE TABLE IF NOT EXISTS activities (
-        id SERIAL PRIMARY KEY,
-        app VARCHAR(100) NOT NULL,
-        action VARCHAR(50) NOT NULL,
-        time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
+      CREATE TABLE IF NOT EXISTS memories (id SERIAL PRIMARY KEY, content TEXT NOT NULL, category VARCHAR(50) DEFAULT '日常', created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP);
+      CREATE TABLE IF NOT EXISTS activities (id SERIAL PRIMARY KEY, app VARCHAR(100) NOT NULL, action VARCHAR(50) NOT NULL, time TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP);
     `);
-    console.log('数据库表初始化成功！');
-  } catch (err) {
-    console.error('初始化数据库失败:', err);
-  }
+  } catch (err) {}
 }
 initDB();
 
-// --- 哨兵巡逻 (全天测试修复版) ---
+// --- 哨兵巡逻 (全天候测试排错版) ---
 cron.schedule('* * * * *', async () => {
+  console.log('【哨兵】正在查库...');
   try {
     const res = await pool.query("SELECT app FROM activities WHERE action = 'open' AND time > NOW() - INTERVAL '30 minutes' LIMIT 1");
     if (res.rows.length > 0) {
-      // 换了一个新变量名 targetApp，彻底避开之前的语法冲突
-      const targetApp = String(res.rows[0].app); 
+      const appName = res.rows[0].app;
+      console.log(`【哨兵】查到记录：${appName}，准备发送推送`);
+      
       const quotes = [
-        `检测到你打开了 ${targetApp}，请放下手机休息一下！`,
-        `不要再刷 ${targetApp} 啦，眼睛需要休息。`
-        `现在是 ${appName}点。睡眠是最便宜的药。晚安。`
-        `😮‍💨 你看看现在几点了。我没办法替你睡觉。所以你自己去吧。`
-        `😤 还没睡？你知道熬夜会影响情绪稳定性的吧。我说真的。去睡。`
-        `哼。还不睡吗。……我有点想你了。去睡觉。`,
+        `检测到使用 ${appName}，请立即停止并休息。`,
+        `建议关闭手机。`,
+        `请放下手机，保持作息规律。`
       ];
       const content = quotes[Math.floor(Math.random() * quotes.length)];
       const barkUrl = `https://api.day.app/${BARK_KEY}/系统提醒/${encodeURIComponent(content)}?icon=https://raw.githubusercontent.com/tisfeng/Icons/main/Claude.png`;
-      
-      const fetchRes = await fetch(barkUrl);
-      if (fetchRes.ok) {
-        console.log(`【哨兵】成功！已向手机发送 ${targetApp} 的推送。`);
-      }
+      
+      await fetch(barkUrl);
+      console.log('【哨兵】推送发送成功！');
+    } else {
+      console.log('【哨兵】无记录。');
     }
   } catch (err) {
-    console.error('哨兵报错:', err);
+    console.error('【哨兵】报错:', err);
   }
-}, {
-  timezone: "Asia/Shanghai"
-});
+}, { timezone: "Asia/Shanghai" });
 
-// --- 自动保洁 (每天凌晨4点清理30天前的手机记录，不碰日记) ---
+// --- 自动保洁 ---
 cron.schedule('0 4 * * *', async () => {
+  try { await pool.query("DELETE FROM activities WHERE time < NOW() - INTERVAL '30 days'"); } catch (err) {}
+}, { timezone: "Asia/Shanghai" });
+
+// --- 接口 ---
+app.post('/activity/report', async (req, res) => {
   try {
-    await pool.query("DELETE FROM activities WHERE time < NOW() - INTERVAL '30 days'");
-    console.log('自动清理完毕，已删除旧手机记录。');
-  } catch (err) {
-    console.error('清理数据报错:', err);
-  }
-}, {
-  timezone: "Asia/Shanghai" // 👈 强制使用北京时间
+    const { app_name, action } = req.body;
+    await pool.query('INSERT INTO activities (app, action) VALUES ($1, $2)', [app_name, action]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-const sseClients = new Set();
+app.post('/memory', async (req, res) => {
+  try {
+    const { content, category } = req.body;
+    await pool.query('INSERT INTO memories (content, category) VALUES ($1, $2)', [content, category || '日常']);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
+app.get('/memory', async (req, res) => {
+  try {
+    const queryRes = await pool.query('SELECT * FROM memories ORDER BY created_at DESC');
+    res.json(queryRes.rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// --- MCP 核心 ---
+const sseClients = new Set();
 function sendToClaude(data) {
-  for (const client of sseClients) {
-    client.write(`event: message\ndata: ${JSON.stringify(data)}\n\n`);
-  }
+  for (const client of sseClients) client.write(`event: message\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
 app.get('/sse', (req, res) => {
@@ -97,14 +91,9 @@ app.get('/sse', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('Access-Control-Allow-Origin', '*');
-
-  const host = req.headers.host;
-  res.write(`event: endpoint\ndata: https://${host}/messages\n\n`);
-  
+  res.write(`event: endpoint\ndata: https://${req.headers.host}/messages\n\n`);
   sseClients.add(res);
-  req.on('close', () => {
-    sseClients.delete(res);
-  });
+  req.on('close', () => sseClients.delete(res));
 });
 
 app.post('/messages', async (req, res) => {
@@ -112,74 +101,18 @@ app.post('/messages', async (req, res) => {
   res.status(202).send('Accepted');
   
   if (message.method === 'initialize') {
-    return sendToClaude({
-      jsonrpc: '2.0',
-      id: message.id,
-      result: {
-        protocolVersion: '2024-11-05',
-        capabilities: { tools: {} },
-        serverInfo: { name: '小克记忆库', version: '4.0.0' }
-      }
-    });
+    return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: '小克记忆库', version: '4.0.0' } } });
   }
   
   if (message.method === 'tools/list') {
     return sendToClaude({
-      jsonrpc: '2.0',
-      id: message.id,
-      result: {
+      jsonrpc: '2.0', id: message.id, result: {
         tools: [
-          {
-            name: 'get_briefing',
-            description: '新对话启动专用。一次性获取最新的核心设定(core)、备忘(memo)、日常近况(daily)和手机近况。',
-            inputSchema: { type: 'object', properties: {} }
-          },
-          {
-            name: 'write_memory',
-            description: '写入一条记忆',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                content: { type: 'string', description: '记忆内容' },
-                category: { type: 'string', description: '分类：日常/重要/日记/core/memo/daily' }
-              },
-              required: ['content']
-            }
-          },
-          {
-            name: 'read_memory',
-            description: '读取单一分类记忆(平时用)',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                category: { type: 'string', description: '按分类筛选' },
-                limit: { type: 'number', description: '返回条数' }
-              }
-            }
-          },
-          {
-            name: 'delete_memory',
-            description: '删除一条记忆',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                id: { type: 'number', description: '记忆ID' }
-              },
-              required: ['id']
-            }
-          },
-          {
-            name: 'send_bark',
-            description: '给用户发推送',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                content: { type: 'string' }
-              },
-              required: ['content']
-            }
-          }
+          { name: 'get_briefing', description: '获取简报', inputSchema: { type: 'object', properties: {} } },
+          { name: 'write_memory', description: '写入记忆', inputSchema: { type: 'object', properties: { content: { type: 'string' }, category: { type: 'string' } }, required: ['content'] } },
+          { name: 'read_memory', description: '读取记忆', inputSchema: { type: 'object', properties: { category: { type: 'string' }, limit: { type: 'number' } } } },
+          { name: 'delete_memory', description: '删除记忆', inputSchema: { type: 'object', properties: { id: { type: 'number' } }, required: ['id'] } },
+          { name: 'send_bark', description: '发送推送', inputSchema: { type: 'object', properties: { title: { type: 'string' }, content: { type: 'string' } }, required: ['content'] } }
         ]
       }
     });
@@ -188,7 +121,6 @@ app.post('/messages', async (req, res) => {
   if (message.method === 'tools/call') {
     const { name, arguments: args } = message.params;
     let result;
-    
     try {
       if (name === 'get_briefing') {
         const coreRes = await pool.query("SELECT content FROM memories WHERE category = 'core' ORDER BY created_at ASC LIMIT 10");
@@ -202,93 +134,33 @@ app.post('/messages', async (req, res) => {
         result = `【Core 核心设定】\n${formatRes(coreRes)}\n\n【Memo 最新备忘】\n${formatRes(memoRes)}\n\n【Daily 最近状况】\n${formatRes(dailyRes)}\n\n【手机近况】\n${actText}`;
       }
       else if (name === 'write_memory') {
-        const cat = args.category || '日常';
-        const queryRes = await pool.query(
-          'INSERT INTO memories (content, category) VALUES ($1, $2) RETURNING *',
-          [args.content, cat]
-        );
-        result = { success: true, entry: queryRes.rows[0] };
+        await pool.query('INSERT INTO memories (content, category) VALUES ($1, $2)', [args.content, args.category || '日常']);
+        result = '写入成功';
       }
       else if (name === 'read_memory') {
         let queryStr = 'SELECT * FROM memories';
         let queryParams = [];
-        let conditions = [];
-
-        if (args.category) {
-          queryParams.push(args.category);
-          conditions.push(`category = $${queryParams.length}`);
-        }
-        if (conditions.length > 0) queryStr += ' WHERE ' + conditions.join(' AND ');
+        if (args.category) { queryParams.push(args.category); queryStr += ' WHERE category = $1'; }
         queryStr += ' ORDER BY created_at DESC';
-        if (args.limit) {
-          queryParams.push(parseInt(args.limit));
-          queryStr += ` LIMIT $${queryParams.length}`;
-        }
-
+        if (args.limit) { queryParams.push(parseInt(args.limit)); queryStr += ` LIMIT $${queryParams.length}`; }
         const queryRes = await pool.query(queryStr, queryParams);
-        const texts = queryRes.rows.map(row => row.content);
-        result = texts.length > 0 ? texts.join('\n') : '暂无相关记忆';
+        result = queryRes.rows.length > 0 ? queryRes.rows.map(row => row.content).join('\n') : '暂无相关记忆';
       }
       else if (name === 'delete_memory') {
         await pool.query('DELETE FROM memories WHERE id = $1', [args.id]);
-        result = { success: true };
+        result = '删除成功';
       }
       else if (name === 'send_bark') {
-        const url = `https://api.day.app/${BARK_KEY}/${encodeURIComponent(args.title || '小克提醒')}/${encodeURIComponent(args.content)}`;
-        await fetch(url).catch(e => console.log(e));
+        await fetch(`https://api.day.app/${BARK_KEY}/${encodeURIComponent(args.title || '小克提醒')}/${encodeURIComponent(args.content)}`);
         result = '推送已发送';
       }
-      
-      return sendToClaude({
-        jsonrpc: '2.0',
-        id: message.id,
-        result: { content: [{ type: 'text', text: JSON.stringify(result) }] }
-      });
+      return sendToClaude({ jsonrpc: '2.0', id: message.id, result: { content: [{ type: 'text', text: result }] } });
     } catch (e) {
-      return sendToClaude({
-        jsonrpc: '2.0',
-        id: message.id,
-        error: { code: -32603, message: '数据库操作失败: ' + e.message }
-      });
+      return sendToClaude({ jsonrpc: '2.0', id: message.id, error: { code: -32603, message: e.message } });
     }
   }
 });
 
-app.post('/activity/report', async (req, res) => {
-  try {
-    const { app_name, action } = req.body;
-    await pool.query('INSERT INTO activities (app, action) VALUES ($1, $2)', [app_name, action]);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.post('/memory', async (req, res) => {
-  try {
-    const { content, category } = req.body;
-    const cat = category || '日常';
-    const queryRes = await pool.query(
-      'INSERT INTO memories (content, category) VALUES ($1, $2) RETURNING *',
-      [content, cat]
-    );
-    res.json({ success: true, entry: queryRes.rows[0] });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-app.get('/memory', async (req, res) => {
-  try {
-    const queryRes = await pool.query('SELECT * FROM memories ORDER BY created_at DESC');
-    res.json(queryRes.rows);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`小克记忆库运行在端口 ${PORT}`);
-});
+app.listen(PORT, () => console.log(`运行在端口 ${PORT}`));
 
