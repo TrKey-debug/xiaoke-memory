@@ -42,14 +42,16 @@ async function initDB() {
 }
 initDB();
 
-// --- 哨兵巡逻 (克制冷静版) ---
-cron.schedule('*/30 0-5 * * *', async () => {
+// --- 哨兵巡逻 (全天测试修复版) ---
+cron.schedule('* * * * *', async () => {
   try {
     const res = await pool.query("SELECT app FROM activities WHERE action = 'open' AND time > NOW() - INTERVAL '30 minutes' LIMIT 1");
     if (res.rows.length > 0) {
-      const appName = res.rows[0].app;
+      // 换了一个新变量名 targetApp，彻底避开之前的语法冲突
+      const targetApp = String(res.rows[0].app); 
       const quotes = [
-        `检测到凌晨使用 ${appName}，请立即停止并休息。`,
+        `检测到你打开了 ${targetApp}，请放下手机休息一下！`,
+        `不要再刷 ${targetApp} 啦，眼睛需要休息。`
         `现在是 ${appName}点。睡眠是最便宜的药。晚安。`
         `😮‍💨 你看看现在几点了。我没办法替你睡觉。所以你自己去吧。`
         `😤 还没睡？你知道熬夜会影响情绪稳定性的吧。我说真的。去睡。`
@@ -57,13 +59,17 @@ cron.schedule('*/30 0-5 * * *', async () => {
       ];
       const content = quotes[Math.floor(Math.random() * quotes.length)];
       const barkUrl = `https://api.day.app/${BARK_KEY}/系统提醒/${encodeURIComponent(content)}?icon=https://raw.githubusercontent.com/tisfeng/Icons/main/Claude.png`;
-      await fetch(barkUrl).catch(e => console.log('Bark推送失败', e));
+      
+      const fetchRes = await fetch(barkUrl);
+      if (fetchRes.ok) {
+        console.log(`【哨兵】成功！已向手机发送 ${targetApp} 的推送。`);
+      }
     }
   } catch (err) {
     console.error('哨兵报错:', err);
   }
 }, {
-  timezone: "Asia/Shanghai" // 👈 强制使用北京时间
+  timezone: "Asia/Shanghai"
 });
 
 // --- 自动保洁 (每天凌晨4点清理30天前的手机记录，不碰日记) ---
