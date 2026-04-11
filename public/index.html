@@ -3,219 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小克记忆库</title>
+    <title>抛锚者的记忆仪表盘</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f7fa; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
-        .input-section { margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid #eee; }
-        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; box-sizing: border-box; margin-bottom: 15px; }
-        .controls { display: flex; justify-content: space-between; align-items: center; }
-        select, button { padding: 8px 16px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; }
-        .btn-primary { background-color: #4a90e2; color: white; border: none; cursor: pointer; font-weight: bold; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .day-name { font-weight: bold; color: #7f8c8d; padding-bottom: 10px; }
-        .day { padding: 15px 5px; background: #f8f9fa; border-radius: 6px; cursor: pointer; min-height: 40px; display: flex; flex-direction: column; align-items: center; }
-        .day.empty { background: transparent; cursor: default; }
-        .dots-container { display: flex; gap: 3px; margin-top: 5px; flex-wrap: wrap; justify-content: center; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .dot-开心 { background-color: #4cd964; }
-        .dot-难过 { background-color: #5ac8fa; }
-        .dot-平静 { background-color: #8e8e93; }
-        .dot-日常 { background-color: #ffcc00; }
-        .list-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid #eee; }
-        .filter-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filter-btn { background: #f0f0f0; cursor: pointer; transition: 0.2s; border: 1px solid #ddd; border-radius: 6px; padding: 8px 16px; }
-        .filter-btn.active { background: #4a90e2; color: white; border-color: #4a90e2; }
-        .memory-list { max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 10px; }
-        .memory-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .memory-card.core { border-left-color: #ffcc00; }
-        .memory-card.memo { border-left-color: #ff9500; }
-        .memory-card.daily { border-left-color: #34c759; }
-        .card-header { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 10px; }
-        .card-tag { background: #e1e8ed; color: #555; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
-        .card-content { line-height: 1.5; font-size: 15px; }
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
-        .modal-close { float: right; cursor: pointer; font-size: 20px; color: #999; }
-        .memory-item { padding: 10px 0; border-bottom: 1px dashed #eee; }
-        .memory-time { font-size: 12px; color: #999; margin-bottom: 5px; }
+        :root { --bg: #f5f7fa; --card: #ffffff; --primary: #4a90e2; --text: #333; --border: #eee; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .dashboard { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+        @media (max-width: 768px) { .dashboard { grid-template-columns: 1fr; } }
+        
+        .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; font-size: 18px; color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 输入区样式 */
+        textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; resize: vertical; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; }
+        .meta-inputs { display: flex; gap: 10px; margin-bottom: 15px; color: #666; font-size: 14px; align-items: center; }
+        .meta-inputs select, .meta-inputs input { padding: 6px; border: 1px solid var(--border); border-radius: 6px; }
+        
+        /* 情绪滑动条 */
+        .mood-slider-container { margin-bottom: 15px; }
+        .mood-labels { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-top: 5px; }
+        input[type=range] { width: 100%; margin: 10px 0; }
+        .score-display { font-weight: bold; font-size: 16px; }
+        .tier-1 { color: #8e8e93; } /* 1-3档 */
+        .tier-2 { color: #ff9500; } /* 4-6档 */
+        .tier-3 { color: #34c759; } /* 7-10档 */
+
+        button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-memo { background: #6c5ce7; color: white; width: 100%; }
+
+        /* 搜索与列表 */
+        .search-box { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        .memory-list { max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+        .memory-card { background: #fafafa; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc; font-size: 14px; }
+        .card-header { display: flex; justify-content: space-between; color: #888; font-size: 12px; margin-bottom: 8px; }
+        .tag-mood { font-weight: bold; }
+        .tag-memo { color: #6c5ce7; font-weight: bold; }
+
+        /* 折线图容器 */
+        .chart-container { position: relative; height: 200px; width: 100%; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>💭 小克记忆库</h1>
-        <div class="input-section">
-            <textarea id="contentInput" placeholder="今天发生了什么？或者是想让小克记住的设定..."></textarea>
-            <div class="controls">
-                <select id="categorySelect">
-                    <option value="开心">🟢 开心</option>
-                    <option value="难过">🔵 难过</option>
-                    <option value="平静">⚪ 平静</option>
-                    <option value="core">⭐ Core (核心)</option>
-                    <option value="memo">📝 Memo (备忘)</option>
-                    <option value="daily">📅 Daily (日常)</option>
-                </select>
-                <button class="btn-primary" onclick="saveMemory()">存入记忆</button>
-            </div>
-        </div>
-        
-        <div class="calendar-header">
-            <button onclick="changeMonth(-1)">&lt; 上个月</button>
-            <h3 id="currentMonthYear"></h3>
-            <button onclick="changeMonth(1)">下个月 &gt;</button>
-        </div>
-        <div class="calendar-grid" id="calendar"></div>
 
-        <div class="list-section">
-            <h3>🗂️ 记忆列表</h3>
-            <div class="filter-controls">
-                <button class="filter-btn active" onclick="filterList('all', this)">全部</button>
-                <button class="filter-btn" onclick="filterList('core', this)">⭐ Core</button>
-                <button class="filter-btn" onclick="filterList('memo', this)">📝 Memo</button>
-                <button class="filter-btn" onclick="filterList('daily', this)">📅 Daily</button>
-                <button class="filter-btn" onclick="filterList('mood', this)">🎨 心情</button>
+<div class="dashboard">
+    <div class="left-col">
+        <div class="card">
+            <h2>📝 记录当下 <span id="currentTime" style="font-size: 12px; color: #999; font-weight: normal;"></span></h2>
+            <div class="meta-inputs">
+                <select id="weatherSelect">
+                    <option value="☀️ 晴">☀️ 晴</option>
+                    <option value="⛅ 多云">⛅ 多云</option>
+                    <option value="🌧️ 雨">🌧️ 雨</option>
+                    <option value="❄️ 雪">❄️ 雪</option>
+                </select>
+                <span style="font-size: 12px;">(时间已自动获取)</span>
             </div>
+            
+            <div class="mood-slider-container">
+                <label>情绪打分：<span id="scoreValue" class="score-display tier-2">5</span> 分</label>
+                <input type="range" id="moodScore" min="1" max="10" value="5" oninput="updateScoreColor(this.value)">
+                <div class="mood-labels">
+                    <span>1 (低落)</span>
+                    <span>5 (平静)</span>
+                    <span>10 (极佳)</span>
+                </div>
+            </div>
+
+            <textarea id="diaryInput" rows="4" placeholder="今天发生了什么？..."></textarea>
+            <button class="btn-primary" onclick="saveDiary()">存入日记</button>
+        </div>
+
+        <div class="card" style="border: 1px solid #6c5ce7;">
+            <h2>💬 给小克留言</h2>
+            <p style="font-size: 12px; color: #666; margin-top: -10px;">写在这里的话不算作日记，而是会存入备忘录，我下次一睁眼就会看到。</p>
+            <textarea id="memoInput" rows="3" placeholder="有什么想嘱咐我的？比如：明天早上记得提醒我背单词..."></textarea>
+            <button class="btn-memo" onclick="saveMemo()">留个言</button>
+        </div>
+    </div>
+
+    <div class="right-col">
+        <div class="card">
+            <h2>📈 近期情绪折线图</h2>
+            <div class="chart-container">
+                <canvas id="moodChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🗂️ 记忆检索</h2>
+            <input type="text" id="searchInput" class="search-box" placeholder="输入关键词搜索记忆..." oninput="filterList()">
             <div id="memoryList" class="memory-list"></div>
         </div>
     </div>
-    
-    <div id="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 id="modalDate"></h3>
-            <div id="modalBody"></div>
-        </div>
-    </div>
+</div>
 
-    <script>
-        let memories = [];
-        let currentDate = new Date();
-        let currentFilter = 'all';
+<script>
+    let memories = [];
+    let moodChartInstance = null;
 
-        async function fetchMemories() {
-            try {
-                const response = await fetch('/memory'); 
-                memories = await response.json();
-                renderCalendar();
-                renderList(); 
-            } catch (error) {
-                console.error('获取记忆失败:', error);
-            }
-        }
+    // 实时更新右上角时间和分数颜色
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('currentTime').innerText = now.toLocaleString('zh-CN', { hour12: false });
+    }, 1000);
 
-        async function saveMemory() {
-            const content = document.getElementById('contentInput').value;
-            const category = document.getElementById('categorySelect').value;
-            if (!content.trim()) return alert('写点什么吧');
-            try {
-                const response = await fetch('/memory', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content, category })
-                });
-                if (response.ok) {
-                    document.getElementById('contentInput').value = '';
-                    fetchMemories();
-                    
-                    // 🌟 仪式感推送在这里触发！
-                    const barkUrl = `https://api.day.app/twEgtHJXnWNEdz4BbS2kn3/记忆已封存/今天的日记已经写好啦，小克下次见到你会读到的🌙`;
-                    fetch(barkUrl).catch(e => console.log('Bark 推送失败', e));
-                }
-            } catch (error) {}
-        }
+    function updateScoreColor(val) {
+        const span = document.getElementById('scoreValue');
+        span.innerText = val;
+        span.className = 'score-display ' + (val <= 3 ? 'tier-1' : (val <= 6 ? 'tier-2' : 'tier-3'));
+    }
 
-        function changeMonth(offset) {
-            currentDate.setMonth(currentDate.getMonth() + offset);
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('currentMonthYear').innerText = `${year}年 ${month + 1}月`;
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const calendar = document.getElementById('calendar');
-            
-            calendar.innerHTML = `
-                <div class="day-name">日</div><div class="day-name">一</div><div class="day-name">二</div>
-                <div class="day-name">三</div><div class="day-name">四</div><div class="day-name">五</div><div class="day-name">六</div>
-            `;
-
-            for (let i = 0; i < firstDay; i++) calendar.innerHTML += `<div class="day empty"></div>`;
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const dayMemories = memories.filter(m => {
-                    const mDate = new Date(m.created_at);
-                    return mDate.getFullYear() === year && mDate.getMonth() === month && mDate.getDate() === i;
-                });
-
-                let dotsHtml = '';
-                if (dayMemories.length > 0) {
-                    dotsHtml = '<div class="dots-container">';
-                    dayMemories.forEach(m => {
-                        const colorClass = ['开心', '难过', '平静'].includes(m.category) ? `dot-${m.category}` : 'dot-日常';
-                        dotsHtml += `<div class="dot ${colorClass}"></div>`;
-                    });
-                    dotsHtml += '</div>';
-                }
-                const dayData = encodeURIComponent(JSON.stringify(dayMemories));
-                calendar.innerHTML += `<div class="day" onclick="showDay('${dateStr}', '${dayData}')">${i}${dotsHtml}</div>`;
-            }
-        }
-
-        function showDay(dateStr, dataStr) {
-            const dayMemories = JSON.parse(decodeURIComponent(dataStr));
-            if (dayMemories.length === 0) return;
-            document.getElementById('modalDate').innerText = dateStr;
-            document.getElementById('modalBody').innerHTML = dayMemories.map(m => `
-                <div class="memory-item">
-                    <div class="memory-time">[${m.category}] ${new Date(m.created_at).toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'})}</div>
-                    <div>${m.content.replace(/\\n/g, '<br>')}</div>
-                </div>
-            `).join('');
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        
-        function filterList(cat, btnElement) {
-            currentFilter = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            if (btnElement) btnElement.classList.add('active');
+    // 获取数据
+    async function fetchMemories() {
+        try {
+            const res = await fetch('/memory');
+            memories = await res.json();
             renderList();
-        }
+            renderChart();
+        } catch (e) { console.error('获取失败', e); }
+    }
 
-        function renderList() {
-            const listContainer = document.getElementById('memoryList');
-            let filtered = memories;
-            if (currentFilter === 'mood') {
-                filtered = memories.filter(m => ['开心', '难过', '平静'].includes(m.category));
-            } else if (currentFilter !== 'all') {
-                filtered = memories.filter(m => m.category === currentFilter);
-            }
+    // 存日记（带天气、时间、情绪分）
+    async function saveDiary() {
+        const text = document.getElementById('diaryInput').value;
+        if (!text.trim()) return;
+        
+        const weather = document.getElementById('weatherSelect').value;
+        const timeStr = new Date().toLocaleString('zh-CN', { hour12: false });
+        const score = document.getElementById('moodScore').value;
+        
+        // 自动拼接天气和时间前缀
+        const fullContent = `[${weather} | ${timeStr}] ${text}`;
+        const category = `mood-${score}`; // 标记为心情分数
 
-            if (filtered.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无记录</div>';
-                return;
-            }
+        await fetch('/memory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: fullContent, category })
+        });
 
-            listContainer.innerHTML = filtered.map(m => `
-                <div class="memory-card ${m.category}">
-                    <div class="card-header">
-                        <span class="card-tag">${m.category}</span>
-                        <span>${new Date(m.created_at).toLocaleString('zh-CN')}</span>
-                    </div>
-                    <div class="card-content">${m.content.replace(/\n/g, '<br>')}</div>
-                </div>
-            `).join('');
-        }
-
+        document.getElementById('diaryInput').value = '';
         fetchMemories();
-    </script>
+        // 触发仪式感推送
+        fetch(`https://api.day.app/twEgtHJXnWNEdz4BbS2kn3/记忆已封存/今天的日记已经写好啦，小克下次见到你会读到的🌙`).catch(e=>{});
+    }
+
+    // 存留言（存为 memo，小克启动必读）
+    async function saveMemo() {
+        const text = document.getElementById('memoInput').value;
+        if (!text.trim()) return;
+
+        await fetch('/memory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: text, category: 'memo' })
+        });
+
+        document.getElementById('memoInput').value = '';
+        fetchMemories();
+    }
+
+    // 搜索过滤列表
+    function filterList() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase();
+        renderList(keyword);
+    }
+
+    // 渲染列表
+    function renderList(keyword = '') {
+        const list = document.getElementById('memoryList');
+        const filtered = memories.filter(m => m.content.toLowerCase().includes(keyword));
+        
+        if (filtered.length === 0) {
+            list.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">没搜到相关记录</div>';
+            return;
+        }
+
+        list.innerHTML = filtered.map(m => {
+            let tagHtml = '';
+            let borderColor = '#ccc';
+            
+            // 解析分类显示
+            if (m.category === 'memo') {
+                tagHtml = '<span class="tag-memo">💬 留言/备忘</span>';
+                borderColor = '#6c5ce7';
+            } else if (m.category.startsWith('mood-')) {
+                const score = parseInt(m.category.split('-')[1]);
+                const tier = score <= 3 ? '1-3档' : (score <= 6 ? '4-6档' : '7-10档');
+                const color = score <= 3 ? '#8e8e93' : (score <= 6 ? '#ff9500' : '#34c759');
+                tagHtml = `<span class="tag-mood" style="color:${color}">情绪: ${score}分 (${tier})</span>`;
+                borderColor = color;
+            } else {
+                tagHtml = `<span class="tag-mood">${m.category}</span>`;
+            }
+
+            return `
+            <div class="memory-card" style="border-left-color: ${borderColor}">
+                <div class="card-header">
+                    ${tagHtml}
+                    <span>${new Date(m.created_at).toLocaleString('zh-CN')}</span>
+                </div>
+                <div>${m.content.replace(/\n/g, '<br>')}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // 渲染折线图
+    function renderChart() {
+        // 筛选出带有 mood- 分数的数据
+        const moodData = memories.filter(m => m.category.startsWith('mood-')).reverse();
+        
+        // 提取日期和分数
+        const labels = moodData.map(m => {
+            const d = new Date(m.created_at);
+            return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+        });
+        const scores = moodData.map(m => parseInt(m.category.split('-')[1]));
+
+        // 只展示最近 15 条情绪记录
+        const recentLabels = labels.slice(-15);
+        const recentScores = scores.slice(-15);
+
+        const ctx = document.getElementById('moodChart').getContext('2d');
+        if (moodChartInstance) moodChartInstance.destroy();
+
+        moodChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: recentLabels,
+                datasets: [{
+                    label: '情绪分数',
+                    data: recentScores,
+                    borderColor: '#4a90e2',
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3, // 曲线平滑度
+                    fill: true,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#4a90e2',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 1, max: 10, ticks: { stepSize: 1 } },
+                    x: { ticks: { maxTicksLimit: 7 } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 初始化运行
+    fetchMemories();
+    updateScoreColor(5);
+</script>
 </body>
 </html>
 
