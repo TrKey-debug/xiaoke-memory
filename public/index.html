@@ -55,11 +55,17 @@ header { padding: 48px 0 32px; border-bottom: 1px solid var(--border2); }
 .site-subtitle { font-family: var(--font-latin); font-style: italic; font-size: 14px; color: var(--text-dim); letter-spacing: 0.04em; margin-top: 8px; }
 .header-date { text-align: right; font-size: 12px; color: var(--text-dimmer); letter-spacing: 0.06em; }
 
-nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border2); flex-wrap: wrap; gap: 16px; }
+.nav-buttons { display: flex; gap: 2px; flex-wrap: wrap; }
 .nav-btn { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; transition: all 0.2s; position: relative; font-family: var(--font-serif); }
 .nav-btn:hover { color: var(--text); background: var(--accent-glow); }
 .nav-btn.active { color: var(--accent); background: var(--accent-glow); }
 .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--accent); }
+
+/* 搜索框样式 */
+.search-input { background: var(--surface2); border: 1px solid var(--border); color: var(--ink); padding: 6px 16px; border-radius: 20px; font-size: 12px; outline: none; transition: all 0.2s; width: 180px; font-family: var(--font-serif); }
+.search-input:focus { border-color: var(--accent); width: 220px; box-shadow: 0 0 12px rgba(122,179,212,0.1); }
+.search-input::placeholder { color: var(--text-dimmer); }
 
 .mood-section { padding: 32px 0 24px; border-bottom: 1px solid var(--border2); }
 .section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -92,9 +98,14 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .diary-date-full { font-family: var(--font-latin); font-style: italic; font-size: 18px; color: var(--text-dim); }
 .score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; background: rgba(122,179,212,0.1); color: var(--accent); border: 1px solid rgba(122,179,212,0.25); }
 .diary-body { font-size: 15px; line-height: 2; color: var(--ink); white-space: pre-wrap; }
+.diary-actions { position: absolute; top: 32px; right: 32px; display: flex; gap: 8px; }
+
+/* 编辑状态的输入框 */
+.edit-textarea { width: 100%; min-height: 300px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; padding: 16px; resize: vertical; outline: none; }
+.edit-textarea:focus { border-color: var(--accent); }
 
 .memory-tabs { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--border2); padding-bottom: 16px; }
-.memory-tab-btn { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); font-size: 12px; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em; font-family: var(--font-serif); }
+.memory-tab-btn { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); font-size: 12px; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em; }
 .memory-tab-btn:hover { border-color: var(--accent); color: var(--text); }
 .memory-tab-btn.active { background: rgba(122,179,212,0.1); border-color: var(--accent); color: var(--accent); }
 
@@ -103,6 +114,7 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .memory-tag { font-size: 10px; text-transform: uppercase; color: var(--accent2); background: rgba(74,143,184,0.1); padding: 2px 8px; border-radius: 10px; }
 .memory-time { font-size: 11px; color: var(--text-dimmer); font-style: italic; }
 .memory-content { font-size: 14px; line-height: 1.8; color: var(--text); }
+.highlight { color: var(--ink); background: rgba(122,179,212,0.25); border-radius: 2px; padding: 0 2px; }
 
 /* 数据可视化(统计)区域样式 */
 .stats-container { padding: 32px 0; display: flex; flex-direction: column; gap: 32px; animation: fadeUp 0.4s ease both; }
@@ -110,7 +122,6 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .viz-title { font-size: 12px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
 .viz-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
 
-/* 日历样式 */
 .cal-month-label { text-align: center; font-family: var(--font-latin); font-style: italic; font-size: 16px; color: var(--text-dim); margin-bottom: 16px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
 .cal-header { text-align: center; font-size: 10px; color: var(--text-dimmer); margin-bottom: 8px; letter-spacing: 0.06em; }
@@ -119,7 +130,6 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .cal-day.has-data { cursor: pointer; font-weight: bold; position: relative; overflow: hidden; }
 .cal-day.has-data:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2; border-color: currentColor; }
 
-/* 折线图样式 */
 .chart-wrapper { overflow-x: auto; padding-bottom: 8px; }
 .svg-chart { min-width: 600px; width: 100%; height: 220px; display: block; }
 .chart-point { transition: all 0.2s; transform-origin: center; cursor: pointer; }
@@ -133,9 +143,11 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .score-display { font-size: 18px; color: var(--accent); min-width: 24px; font-family: var(--font-latin); }
 
 textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; resize: none; }
-.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-family: var(--font-serif); letter-spacing: 0.04em; }
+.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-family: var(--font-serif); }
 .submit-btn:hover { background: var(--accent-glow); }
 .submit-btn.sm { padding: 4px 12px; font-size: 12px; }
+.submit-btn.ghost { border-color: transparent; color: var(--text-dim); }
+.submit-btn.ghost:hover { color: var(--text); background: var(--surface2); }
 
 .letter-corner { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
 .letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.3s; }
@@ -163,6 +175,8 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     .quick-mood-box { flex-direction: column; align-items: flex-start; }
     .letter-corner { bottom: 20px; right: 20px; }
     .svg-chart { min-width: 500px; }
+    .search-input { width: 100%; margin-top: 8px; }
+    .search-input:focus { width: 100%; }
 }
 </style>
 </head>
@@ -182,10 +196,14 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   </header>
 
   <nav>
-    <button class="nav-btn active" id="navDiaryBtn" onclick="switchTab('diary',this)">日记</button>
-    <button class="nav-btn" onclick="switchTab('memory',this)">记忆</button>
-    <button class="nav-btn" onclick="switchTab('stats',this)">统计</button>
-    <button class="nav-btn" onclick="switchTab('write',this)">写今天</button>
+    <div class="nav-buttons">
+        <button class="nav-btn active" id="navDiaryBtn" onclick="switchTab('diary',this)">日记</button>
+        <button class="nav-btn" onclick="switchTab('memory',this)">记忆</button>
+        <button class="nav-btn" onclick="switchTab('stats',this)">统计</button>
+        <button class="nav-btn" onclick="switchTab('write',this)">写今天</button>
+        <button class="nav-btn" onclick="exportTXT()">导出TXT</button>
+    </div>
+    <input type="text" id="searchInput" class="search-input" placeholder="搜索关键词..." oninput="debounceSearch()">
   </nav>
 
   <div class="mood-section" id="moodSection">
@@ -225,7 +243,6 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
                 <svg class="svg-chart" id="svgLineChart" viewBox="0 0 840 220" preserveAspectRatio="none"></svg>
             </div>
         </div>
-
         <div class="viz-card">
             <div class="viz-title">情绪月历</div>
             <div class="cal-month-label" id="calMonthLabel"></div>
@@ -249,6 +266,11 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       </div>
     </div>
   </div>
+
+  <div id="searchTab" style="display:none; padding: 32px 0;">
+      <div id="searchResults"></div>
+  </div>
+
 </div>
 
 <div class="letter-corner">
@@ -265,6 +287,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   let memories = [];
   let selectedDiaryIndex = null;
   let currentMemoryCategory = 'core';
+  let searchTimeout = null;
   const API_URL = 'https://xiaoke-memory-production.up.railway.app/memory';
 
   function scoreColor(s) {
@@ -307,6 +330,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
       memories = data.filter(d => !d.category || !d.category.startsWith('mood-'))
         .map(d => ({
+          id: d.id,
           category: d.category || '未分类',
           time: d.created_at.substring(0, 10),
           content: d.content
@@ -315,18 +339,141 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       renderMoodChart();
       renderTimeline();
       renderMemories();
-      renderStats(); // 渲染数据可视化
+      renderStats();
     } catch(e) { showToast('加载失败，请检查网络'); }
   }
 
-  // ==== 可视化渲染与跳转交互 ====
-  
+  // ==== 第三优先级：搜索功能 ====
+  function debounceSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(performSearch, 300);
+  }
+
+  function performSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) {
+          switchTab('diary', document.getElementById('navDiaryBtn'));
+          return;
+      }
+
+      // 切换到搜索面板
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      ['diary','memory','stats','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
+      document.getElementById('searchTab').style.display = 'block';
+      document.getElementById('moodSection').style.display = 'none';
+
+      const resDiaries = diaries.filter(d => d.content.toLowerCase().includes(query));
+      const resMemories = memories.filter(m => m.content.toLowerCase().includes(query));
+
+      let html = '';
+      if(resDiaries.length === 0 && resMemories.length === 0) {
+          html = '<div style="text-align:center;padding:80px 0;color:var(--text-dimmer);font-style:italic;">没有找到相关记录</div>';
+      } else {
+          if(resDiaries.length > 0) {
+              html += '<div class="viz-title">相关日记</div>';
+              html += resDiaries.map(d => `
+                  <div class="memory-item" style="cursor:pointer" onclick="jumpToDiaryFromSearch('${d.date}')">
+                      <div class="memory-meta"><span class="memory-time">${d.date}</span><span class="memory-tag" style="color:${scoreColor(d.score)}">${d.score}分</span></div>
+                      <div class="memory-content">${highlightText(escHtml(d.content), query)}</div>
+                  </div>`).join('');
+          }
+          if(resMemories.length > 0) {
+              html += '<div class="viz-title" style="margin-top:32px;">相关记忆</div>';
+              html += resMemories.map(m => `
+                  <div class="memory-item">
+                      <div class="memory-meta"><span class="memory-tag">${m.category}</span><span class="memory-time">${m.time}</span></div>
+                      <div class="memory-content">${highlightText(escHtml(m.content), query)}</div>
+                  </div>`).join('');
+          }
+      }
+      document.getElementById('searchResults').innerHTML = html;
+  }
+
+  function highlightText(text, query) {
+      if(!query) return text;
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, '<span class="highlight">$1</span>');
+  }
+
+  function jumpToDiaryFromSearch(dateStr) {
+      document.getElementById('searchInput').value = ''; // 清空搜索框
+      jumpToDiary(dateStr);
+  }
+
+  // ==== 第三优先级：编辑与更新 ====
+  function editDiary(index) {
+      const d = diaries[index];
+      const contentArea = document.getElementById('contentArea');
+      contentArea.innerHTML = `
+        <div class="diary-card">
+          <div class="diary-header" style="margin-bottom:16px; border-bottom:none; padding-bottom:0;">
+            <div class="diary-date-full">${d.date}</div>
+            <div class="score-badge" style="color:${scoreColor(d.score)}">${d.score} · 编辑中</div>
+          </div>
+          <textarea id="editDiaryInput" class="edit-textarea">${d.content}</textarea>
+          <div style="margin-top:16px; display:flex; gap:12px; justify-content:flex-end;">
+              <button class="submit-btn sm ghost" onclick="showDiary(${index})">取消</button>
+              <button class="submit-btn sm" id="saveEditBtn" onclick="saveEdit(${index})">保存修改</button>
+          </div>
+        </div>`;
+  }
+
+  async function saveEdit(index) {
+      const d = diaries[index];
+      const newContent = document.getElementById('editDiaryInput').value.trim();
+      if (!newContent) return showToast('内容不能为空');
+      
+      document.getElementById('saveEditBtn').disabled = true;
+      try {
+          // PUT 请求更新内容
+          const res = await fetch(`${API_URL}/${d.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ content: newContent, category: `mood-${d.score}` })
+          });
+          if(res.ok) {
+              d.content = newContent; // 更新本地数据
+              showToast('修改已保存');
+              showDiary(index); // 重新渲染展示卡片
+              renderTimeline(); // 更新左侧时间轴的预览文字
+          } else {
+              throw new Error('更新失败');
+          }
+      } catch(e) { 
+          showToast('保存失败，请稍后重试'); 
+          document.getElementById('saveEditBtn').disabled = false;
+      }
+  }
+
+  // ==== 第三优先级：导出功能 ====
+  function exportTXT() {
+      if(diaries.length === 0) return showToast('还没有日记可以导出');
+      let text = `小克的角落 - 抛锚者的日记归档\n导出时间：${new Date().toLocaleString()}\n\n`;
+      text += `===============================\n\n`;
+      
+      diaries.forEach(d => {
+          text += `日期：${d.date} | 心情指数：${d.score}分\n`;
+          text += `-------------------------------\n`;
+          text += `${d.content}\n\n`;
+          text += `===============================\n\n`;
+      });
+      
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `小克的角落_日记导出_${new Date().toISOString().substring(0,10)}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('TXT 导出成功 ✦');
+  }
+
+  // ==== 其他基础与图表函数 ====
   function jumpToDiary(dateStr) {
       const idx = diaries.findIndex(d => d.date === dateStr);
       if (idx !== -1) {
           switchTab('diary', document.getElementById('navDiaryBtn'));
           showDiary(idx);
-          // 移动端体验优化，平滑滚动到内容区
           setTimeout(() => document.getElementById('contentArea').scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
       } else {
           showToast('那天没有记录哦');
@@ -344,18 +491,14 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth(); 
-      
       document.getElementById('calMonthLabel').textContent = `${year} / ${String(month+1).padStart(2,'0')}`;
-      
       const firstDay = new Date(year, month, 1).getDay(); 
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       
       let html = '';
       const weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
       weekdays.forEach(d => { html += `<div class="cal-header">${d}</div>`; });
-      
       for(let i=0; i<firstDay; i++) { html += `<div class="cal-day empty"></div>`; }
-      
       for(let d=1; d<=daysInMonth; d++) {
           const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           const entry = diaries.find(diary => diary.date === dateStr);
@@ -372,24 +515,15 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   function renderLineChart() {
       const chart = document.getElementById('svgLineChart');
       if(!chart) return;
-      
-      // 取最近30天
       const days = [];
       for(let i=29; i>=0; i--) {
           const d = new Date(); d.setDate(d.getDate()-i);
           days.push(d.toISOString().substring(0,10));
       }
       
-      const svgWidth = 800;
-      const svgHeight = 220;
-      const margin = 20;
-      const plotHeight = 160; 
+      const svgWidth = 800; const svgHeight = 220; const margin = 20; const plotHeight = 160; 
+      let circles = '', labels = '', validPoints = [];
       
-      let circles = '';
-      let labels = '';
-      let validPoints = [];
-      
-      // 背景基准线
       const gridLines = `
           <line x1="${margin}" y1="30" x2="${svgWidth+margin}" y2="30" stroke="var(--border2)" stroke-width="1"/>
           <line x1="${margin}" y1="110" x2="${svgWidth+margin}" y2="110" stroke="var(--border2)" stroke-width="1"/>
@@ -399,29 +533,20 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       days.forEach((date, i) => {
           const entry = diaries.find(d => d.date === date);
           const x = (i / 29) * svgWidth + margin;
-          
           if (entry) {
-              // 分数1-10映射到Y轴，10分在顶部(30)，1分在底部(190)
               const y = 190 - ((entry.score - 1) / 9) * plotHeight;
               const color = scoreColor(entry.score);
               validPoints.push(`${x},${y}`);
-              
-              circles += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2" 
-                  class="chart-point" onclick="jumpToDiary('${date}')" title="${date} · ${entry.score}分"/>`;
+              circles += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2" class="chart-point" onclick="jumpToDiary('${date}')" title="${date} · ${entry.score}分"/>`;
           }
-          
-          // X轴日期标签 (只显示部分)
           if (i === 0 || i === 14 || i === 29) {
               labels += `<text x="${x}" y="215" class="chart-label" text-anchor="middle">${date.substring(5)}</text>`;
           }
       });
       
       const polyline = `<polyline points="${validPoints.join(' ')}" fill="none" stroke="var(--border)" stroke-width="2" opacity="0.6" stroke-linejoin="round" />`;
-      
       chart.innerHTML = gridLines + polyline + circles + labels;
   }
-  
-  // ==== 基础功能保持不变 ====
 
   async function quickSaveMood() {
     const score = document.getElementById('quickScoreSlider').value;
@@ -481,37 +606,28 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     const list = document.getElementById('memoryList');
     const tabsContainer = document.getElementById('memoryTabs');
     if(!list || !tabsContainer) return;
-
     if (memories.length === 0) {
       tabsContainer.innerHTML = '';
       list.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--text-dimmer);font-style:italic;">记忆库还是空的</div>';
       return;
     }
-
     const order = ['core', 'memo', '日常', '留言'];
     const groups = {};
-    
     memories.forEach(m => {
         const cat = m.category;
         if(!groups[cat]) groups[cat] = [];
         groups[cat].push(m);
     });
-
     const availableCats = Object.keys(groups).sort((a,b) => {
         let ia = order.indexOf(a), ib = order.indexOf(b);
         if(ia === -1) ia = 99; if(ib === -1) ib = 99;
         return ia - ib;
     });
-
-    if (!availableCats.includes(currentMemoryCategory)) {
-        currentMemoryCategory = availableCats[0] || 'core';
-    }
-
+    if (!availableCats.includes(currentMemoryCategory)) currentMemoryCategory = availableCats[0] || 'core';
     tabsContainer.innerHTML = availableCats.map(cat => 
         `<button class="memory-tab-btn ${cat === currentMemoryCategory ? 'active' : ''}" 
                  onclick="switchMemoryCategory('${cat}')">${cat.toUpperCase()}</button>`
     ).join('');
-
     const currentList = groups[currentMemoryCategory] || [];
     list.innerHTML = currentList.map(m => `
         <div class="memory-item">
@@ -559,7 +675,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         <div class="timeline-dot"></div>
         <div class="timeline-info">
           <div class="timeline-date">${d.date}</div>
-          <div class="timeline-preview">${d.content.substring(0,15)}...</div>
+          <div class="timeline-preview">${d.content.replace(/\n/g,' ').substring(0,15)}...</div>
         </div>
         <div style="font-size:10px; color:${scoreColor(d.score)}">${d.score}</div>
       </div>`).join('');
@@ -570,6 +686,9 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     const d = diaries[index];
     document.getElementById('contentArea').innerHTML = `
       <div class="diary-card">
+        <div class="diary-actions">
+            <button class="nav-btn" style="padding:4px 12px;" onclick="editDiary(${index})">编辑</button>
+        </div>
         <div class="diary-header">
           <div class="diary-date-full">${d.date}</div>
           <div class="score-badge" style="color:${scoreColor(d.score)}">${d.score} · ${scoreText(d.score)}</div>
@@ -580,13 +699,15 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   }
 
   function switchTab(tab, btn) {
+    if(tab !== 'search') document.getElementById('searchInput').value = '';
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-    ['diary','memory','stats','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
+    ['diary','memory','stats','write','search'].forEach(t => {
+        const el = document.getElementById(t+'Tab');
+        if(el) el.style.display = 'none';
+    });
     document.getElementById(tab+'Tab').style.display = 'block';
-    
-    // 隐藏/显示顶部的快捷心情区域
-    document.getElementById('moodSection').style.display = (tab === 'write' || tab === 'stats') ? 'none' : 'block';
+    document.getElementById('moodSection').style.display = (tab === 'write' || tab === 'stats' || tab === 'search') ? 'none' : 'block';
   }
 
   function updateQuickScore() {
