@@ -55,18 +55,19 @@ header { padding: 48px 0 32px; border-bottom: 1px solid var(--border2); }
 .site-subtitle { font-family: var(--font-latin); font-style: italic; font-size: 14px; color: var(--text-dim); letter-spacing: 0.04em; margin-top: 8px; }
 .header-date { text-align: right; font-size: 12px; color: var(--text-dimmer); letter-spacing: 0.06em; }
 
-nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--border2); }
-.nav-btn { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; transition: all 0.2s; position: relative; }
+nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--border2); flex-wrap: wrap; }
+.nav-btn { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; transition: all 0.2s; position: relative; font-family: var(--font-serif); }
 .nav-btn:hover { color: var(--text); background: var(--accent-glow); }
 .nav-btn.active { color: var(--accent); background: var(--accent-glow); }
 .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--accent); }
 
 .mood-section { padding: 32px 0 24px; border-bottom: 1px solid var(--border2); }
-.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; }
+.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
 .mood-chart { height: 80px; display: flex; align-items: flex-end; gap: 8px; margin-bottom: 20px; }
 .mood-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mood-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; height: 56px; }
-.mood-bar { width: 6px; border-radius: 3px; transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+.mood-bar { width: 6px; border-radius: 3px; transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1); position: relative; cursor: pointer; }
+.mood-bar:hover { transform: scaleX(1.5); filter: brightness(1.2); }
 .mood-bar::after { content: ''; position: absolute; inset: 0; border-radius: 3px; opacity: 0.4; filter: blur(4px); background: inherit; }
 .mood-date-label { font-size: 10px; color: var(--text-dimmer); }
 
@@ -92,7 +93,6 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; background: rgba(122,179,212,0.1); color: var(--accent); border: 1px solid rgba(122,179,212,0.25); }
 .diary-body { font-size: 15px; line-height: 2; color: var(--ink); white-space: pre-wrap; }
 
-/* 记忆页面标签分类样式 */
 .memory-tabs { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 1px solid var(--border2); padding-bottom: 16px; }
 .memory-tab-btn { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); font-size: 12px; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em; font-family: var(--font-serif); }
 .memory-tab-btn:hover { border-color: var(--accent); color: var(--text); }
@@ -104,6 +104,28 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .memory-time { font-size: 11px; color: var(--text-dimmer); font-style: italic; }
 .memory-content { font-size: 14px; line-height: 1.8; color: var(--text); }
 
+/* 数据可视化(统计)区域样式 */
+.stats-container { padding: 32px 0; display: flex; flex-direction: column; gap: 32px; animation: fadeUp 0.4s ease both; }
+.viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+.viz-title { font-size: 12px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+.viz-title::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+
+/* 日历样式 */
+.cal-month-label { text-align: center; font-family: var(--font-latin); font-style: italic; font-size: 16px; color: var(--text-dim); margin-bottom: 16px; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.cal-header { text-align: center; font-size: 10px; color: var(--text-dimmer); margin-bottom: 8px; letter-spacing: 0.06em; }
+.cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 6px; border: 1px solid var(--border2); color: var(--text-dim); transition: all 0.2s; font-family: var(--font-latin); }
+.cal-day.empty { border: none; background: transparent; }
+.cal-day.has-data { cursor: pointer; font-weight: bold; position: relative; overflow: hidden; }
+.cal-day.has-data:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 2; border-color: currentColor; }
+
+/* 折线图样式 */
+.chart-wrapper { overflow-x: auto; padding-bottom: 8px; }
+.svg-chart { min-width: 600px; width: 100%; height: 220px; display: block; }
+.chart-point { transition: all 0.2s; transform-origin: center; cursor: pointer; }
+.chart-point:hover { r: 7; filter: brightness(1.2); stroke: var(--accent); }
+.chart-label { font-size: 9px; fill: var(--text-dimmer); font-family: var(--font-latin); }
+
 .write-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; }
 .score-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
 .score-slider { -webkit-appearance: none; width: 160px; height: 3px; background: var(--border); outline: none; cursor: pointer; border-radius: 2px; }
@@ -111,26 +133,27 @@ nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--b
 .score-display { font-size: 18px; color: var(--accent); min-width: 24px; font-family: var(--font-latin); }
 
 textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; resize: none; }
-.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 4px; cursor: pointer; transition: all 0.2s; font-family: var(--font-serif); letter-spacing: 0.04em; }
 .submit-btn:hover { background: var(--accent-glow); }
 .submit-btn.sm { padding: 4px 12px; font-size: 12px; }
 
 .letter-corner { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
-.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.3s; }
+.letter-btn:hover { transform: scale(1.05); }
 .letter-panel { position: absolute; bottom: 56px; right: 0; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: none; }
-.letter-panel.open { display: block; }
-.letter-textarea { width: 100%; min-height: 100px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 4px; color: var(--ink); padding: 10px; resize: none; outline: none; font-size: 13px; }
+.letter-panel.open { display: block; animation: fadeUp 0.2s ease both; }
+.letter-textarea { width: 100%; min-height: 100px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 4px; color: var(--ink); padding: 10px; resize: none; outline: none; font-size: 13px; font-family: var(--font-serif); }
 
-.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); padding: 10px 24px; border-radius: 4px; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; }
+.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); padding: 10px 24px; border-radius: 4px; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.3); font-size: 13px; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 .stamp-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 300; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
 .stamp-overlay.show { opacity: 1; }
-.stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; transform: rotate(-12deg); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
-@keyframes stampIn { from { transform: rotate(-12deg) scale(2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 0.7; } }
+.stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; transform: rotate(-12deg); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; opacity: 0.8; }
+@keyframes stampIn { from { transform: rotate(-12deg) scale(2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 0.8; } }
 
 .loading { text-align: center; padding: 60px 0; color: var(--text-dimmer); font-size: 13px; }
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 @media (max-width: 640px) {
@@ -138,6 +161,8 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     .timeline { border-right: none; border-bottom: 1px solid var(--border2); padding: 24px 0; }
     .content-area { padding: 24px 0 0; }
     .quick-mood-box { flex-direction: column; align-items: flex-start; }
+    .letter-corner { bottom: 20px; right: 20px; }
+    .svg-chart { min-width: 500px; }
 }
 </style>
 </head>
@@ -157,15 +182,16 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   </header>
 
   <nav>
-    <button class="nav-btn active" onclick="switchTab('diary',this)">日记</button>
+    <button class="nav-btn active" id="navDiaryBtn" onclick="switchTab('diary',this)">日记</button>
     <button class="nav-btn" onclick="switchTab('memory',this)">记忆</button>
+    <button class="nav-btn" onclick="switchTab('stats',this)">统计</button>
     <button class="nav-btn" onclick="switchTab('write',this)">写今天</button>
   </nav>
 
   <div class="mood-section" id="moodSection">
     <div class="section-label">
         <span>最近七天心情</span>
-        <span id="quickMoodLabel" style="color:var(--text-dimmer); font-size:10px;">快速记录今日心情 →</span>
+        <span style="color:var(--text-dimmer); font-size:10px;">快速记录今日心情 →</span>
     </div>
     <div class="mood-chart" id="moodChart"></div>
     
@@ -189,6 +215,23 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   <div id="memoryTab" style="display:none; padding: 32px 0;">
     <div id="memoryTabs" class="memory-tabs"></div>
     <div id="memoryList"><div class="loading">加载中…</div></div>
+  </div>
+
+  <div id="statsTab" style="display:none;">
+    <div class="stats-container">
+        <div class="viz-card">
+            <div class="viz-title">近30天情绪轨迹</div>
+            <div class="chart-wrapper">
+                <svg class="svg-chart" id="svgLineChart" viewBox="0 0 840 220" preserveAspectRatio="none"></svg>
+            </div>
+        </div>
+
+        <div class="viz-card">
+            <div class="viz-title">情绪月历</div>
+            <div class="cal-month-label" id="calMonthLabel"></div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </div>
   </div>
 
   <div id="writeTab" style="display:none; padding: 32px 0;">
@@ -221,7 +264,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   let diaries = [];
   let memories = [];
   let selectedDiaryIndex = null;
-  let currentMemoryCategory = 'core'; // 当前选中的记忆分类
+  let currentMemoryCategory = 'core';
   const API_URL = 'https://xiaoke-memory-production.up.railway.app/memory';
 
   function scoreColor(s) {
@@ -272,8 +315,113 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       renderMoodChart();
       renderTimeline();
       renderMemories();
+      renderStats(); // 渲染数据可视化
     } catch(e) { showToast('加载失败，请检查网络'); }
   }
+
+  // ==== 可视化渲染与跳转交互 ====
+  
+  function jumpToDiary(dateStr) {
+      const idx = diaries.findIndex(d => d.date === dateStr);
+      if (idx !== -1) {
+          switchTab('diary', document.getElementById('navDiaryBtn'));
+          showDiary(idx);
+          // 移动端体验优化，平滑滚动到内容区
+          setTimeout(() => document.getElementById('contentArea').scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
+      } else {
+          showToast('那天没有记录哦');
+      }
+  }
+
+  function renderStats() {
+      renderCalendar();
+      renderLineChart();
+  }
+
+  function renderCalendar() {
+      const cal = document.getElementById('calendarGrid');
+      if(!cal) return;
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth(); 
+      
+      document.getElementById('calMonthLabel').textContent = `${year} / ${String(month+1).padStart(2,'0')}`;
+      
+      const firstDay = new Date(year, month, 1).getDay(); 
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      let html = '';
+      const weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+      weekdays.forEach(d => { html += `<div class="cal-header">${d}</div>`; });
+      
+      for(let i=0; i<firstDay; i++) { html += `<div class="cal-day empty"></div>`; }
+      
+      for(let d=1; d<=daysInMonth; d++) {
+          const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const entry = diaries.find(diary => diary.date === dateStr);
+          if (entry) {
+              const color = scoreColor(entry.score);
+              html += `<div class="cal-day has-data" style="background:${color}1A; border-color:${color}4D; color:${color}" onclick="jumpToDiary('${dateStr}')" title="${entry.score}分 · 点击查看">${d}</div>`;
+          } else {
+              html += `<div class="cal-day">${d}</div>`;
+          }
+      }
+      cal.innerHTML = html;
+  }
+
+  function renderLineChart() {
+      const chart = document.getElementById('svgLineChart');
+      if(!chart) return;
+      
+      // 取最近30天
+      const days = [];
+      for(let i=29; i>=0; i--) {
+          const d = new Date(); d.setDate(d.getDate()-i);
+          days.push(d.toISOString().substring(0,10));
+      }
+      
+      const svgWidth = 800;
+      const svgHeight = 220;
+      const margin = 20;
+      const plotHeight = 160; 
+      
+      let circles = '';
+      let labels = '';
+      let validPoints = [];
+      
+      // 背景基准线
+      const gridLines = `
+          <line x1="${margin}" y1="30" x2="${svgWidth+margin}" y2="30" stroke="var(--border2)" stroke-width="1"/>
+          <line x1="${margin}" y1="110" x2="${svgWidth+margin}" y2="110" stroke="var(--border2)" stroke-width="1"/>
+          <line x1="${margin}" y1="190" x2="${svgWidth+margin}" y2="190" stroke="var(--border2)" stroke-width="1"/>
+      `;
+      
+      days.forEach((date, i) => {
+          const entry = diaries.find(d => d.date === date);
+          const x = (i / 29) * svgWidth + margin;
+          
+          if (entry) {
+              // 分数1-10映射到Y轴，10分在顶部(30)，1分在底部(190)
+              const y = 190 - ((entry.score - 1) / 9) * plotHeight;
+              const color = scoreColor(entry.score);
+              validPoints.push(`${x},${y}`);
+              
+              circles += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2" 
+                  class="chart-point" onclick="jumpToDiary('${date}')" title="${date} · ${entry.score}分"/>`;
+          }
+          
+          // X轴日期标签 (只显示部分)
+          if (i === 0 || i === 14 || i === 29) {
+              labels += `<text x="${x}" y="215" class="chart-label" text-anchor="middle">${date.substring(5)}</text>`;
+          }
+      });
+      
+      const polyline = `<polyline points="${validPoints.join(' ')}" fill="none" stroke="var(--border)" stroke-width="2" opacity="0.6" stroke-linejoin="round" />`;
+      
+      chart.innerHTML = gridLines + polyline + circles + labels;
+  }
+  
+  // ==== 基础功能保持不变 ====
 
   async function quickSaveMood() {
     const score = document.getElementById('quickScoreSlider').value;
@@ -308,7 +456,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         showStamp();
         document.getElementById('diaryInput').value = '';
         await loadAll();
-        switchTab('diary', document.querySelector('nav .nav-btn'));
+        switchTab('diary', document.getElementById('navDiaryBtn'));
       }
     } catch(e) { showToast('保存失败'); }
   }
@@ -359,13 +507,11 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         currentMemoryCategory = availableCats[0] || 'core';
     }
 
-    // 渲染顶部切换标签
     tabsContainer.innerHTML = availableCats.map(cat => 
         `<button class="memory-tab-btn ${cat === currentMemoryCategory ? 'active' : ''}" 
                  onclick="switchMemoryCategory('${cat}')">${cat.toUpperCase()}</button>`
     ).join('');
 
-    // 渲染当前分类的内容
     const currentList = groups[currentMemoryCategory] || [];
     list.innerHTML = currentList.map(m => `
         <div class="memory-item">
@@ -380,7 +526,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   function switchMemoryCategory(cat) {
       currentMemoryCategory = cat;
-      renderMemories(); // 重新渲染列表和高亮状态
+      renderMemories(); 
   }
 
   function renderMoodChart() {
@@ -399,7 +545,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         chart.innerHTML += `
             <div class="mood-day">
                 <div class="mood-bar-wrap">
-                    <div class="mood-bar" style="height:${h}px; background:${c}"></div>
+                    <div class="mood-bar" style="height:${h}px; background:${c}" onclick="${s ? `jumpToDiary('${date}')` : ''}" title="${s ? s+'分' : '无记录'}"></div>
                 </div>
                 <div class="mood-date-label">${date.substring(5)}</div>
             </div>`;
@@ -435,10 +581,12 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   function switchTab(tab, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    ['diary','memory','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
+    if(btn) btn.classList.add('active');
+    ['diary','memory','stats','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
     document.getElementById(tab+'Tab').style.display = 'block';
-    document.getElementById('moodSection').style.display = tab === 'write' ? 'none' : 'block';
+    
+    // 隐藏/显示顶部的快捷心情区域
+    document.getElementById('moodSection').style.display = (tab === 'write' || tab === 'stats') ? 'none' : 'block';
   }
 
   function updateQuickScore() {
