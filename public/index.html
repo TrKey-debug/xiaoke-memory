@@ -19,12 +19,12 @@
     --accent2: #4a8fb8;
     --accent-glow: rgba(122, 179, 212, 0.15);
     --ink: #e8f0f8;
-    --font-serif: 'PingFang SC', 'Microsoft YaHei', 'STSong', serif;
-    --font-display: 'PingFang SC', 'STKaiti', 'KaiTi', serif;
-    --font-latin: Georgia, 'Times New Roman', serif;
+    /* 移除外部字体，使用系统原生字体族 */
+    --font-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", serif;
+    --font-display: "STKaiti", "KaiTi", serif;
+    --font-latin: Georgia, "Times New Roman", serif;
 }
 
-/* 修复了此处的通配符选择器 */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -43,21 +43,7 @@ body::before {
         radial-gradient(1px 1px at 35% 60%, rgba(200,220,255,0.3) 0%, transparent 100%),
         radial-gradient(1.5px 1.5px at 55% 15%, rgba(200,220,255,0.35) 0%, transparent 100%),
         radial-gradient(1px 1px at 75% 45%, rgba(200,220,255,0.25) 0%, transparent 100%),
-        radial-gradient(1px 1px at 88% 80%, rgba(200,220,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 25% 85%, rgba(200,220,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 65% 70%, rgba(200,220,255,0.25) 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 92% 25%, rgba(200,220,255,0.3) 0%, transparent 100%),
-        radial-gradient(1px 1px at 45% 40%, rgba(200,220,255,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 8% 55%, rgba(200,220,255,0.25) 0%, transparent 100%);
-    pointer-events: none; z-index: 0;
-}
-
-body::after {
-    content: '';
-    position: fixed; top: -200px; left: 50%;
-    transform: translateX(-50%);
-    width: 800px; height: 400px;
-    background: radial-gradient(ellipse, rgba(74,143,184,0.08) 0%, transparent 70%);
+        radial-gradient(1px 1px at 88% 80%, rgba(200,220,255,0.3) 0%, transparent 100%);
     pointer-events: none; z-index: 0;
 }
 
@@ -71,100 +57,96 @@ header { padding: 48px 0 32px; border-bottom: 1px solid var(--border2); }
 .header-date { text-align: right; font-size: 12px; color: var(--text-dimmer); letter-spacing: 0.06em; }
 
 nav { display: flex; gap: 2px; padding: 20px 0; border-bottom: 1px solid var(--border2); }
-.nav-btn { background: none; border: none; color: var(--text-dim); font-family: var(--font-serif); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; letter-spacing: 0.04em; transition: all 0.2s; position: relative; }
+.nav-btn { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 8px 16px; cursor: pointer; border-radius: 4px; transition: all 0.2s; position: relative; }
 .nav-btn:hover { color: var(--text); background: var(--accent-glow); }
 .nav-btn.active { color: var(--accent); background: var(--accent-glow); }
 .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--accent); }
 
+/* 快速心情记录入口 */
 .mood-section { padding: 32px 0 24px; border-bottom: 1px solid var(--border2); }
-.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; }
-.mood-chart { height: 80px; display: flex; align-items: flex-end; gap: 8px; }
+.section-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; }
+.mood-chart { height: 80px; display: flex; align-items: flex-end; gap: 8px; margin-bottom: 20px; }
 .mood-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mood-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; height: 56px; }
 .mood-bar { width: 6px; border-radius: 3px; transition: height 0.6s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
 .mood-bar::after { content: ''; position: absolute; inset: 0; border-radius: 3px; opacity: 0.4; filter: blur(4px); background: inherit; }
-.mood-bar:hover { transform: scaleX(1.5); cursor: pointer; }
-.mood-date-label { font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.04em; }
+.mood-date-label { font-size: 10px; color: var(--text-dimmer); }
+
+.quick-mood-box { 
+    display: flex; align-items: center; gap: 16px; 
+    padding: 12px 16px; background: var(--surface); 
+    border: 1px solid var(--border); border-radius: 8px;
+    flex-wrap: wrap;
+}
+.quick-mood-title { font-size: 12px; color: var(--text-dim); }
 
 .main-layout { display: grid; grid-template-columns: 240px 1fr; gap: 0; min-height: 600px; }
 .timeline { border-right: 1px solid var(--border2); padding: 32px 24px 32px 0; }
 .timeline-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 4px; }
 .timeline-item:hover { background: var(--accent-glow); }
 .timeline-item.active { background: var(--accent-glow); border: 1px solid var(--border); }
-.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dimmer); margin-top: 5px; flex-shrink: 0; transition: all 0.2s; }
-.timeline-item.active .timeline-dot, .timeline-item:hover .timeline-dot { background: var(--accent); box-shadow: 0 0 8px rgba(122,179,212,0.6); }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dimmer); margin-top: 5px; flex-shrink: 0; }
+.timeline-item.active .timeline-dot { background: var(--accent); box-shadow: 0 0 8px rgba(122,179,212,0.6); }
 .timeline-info { flex: 1; min-width: 0; }
-.timeline-date { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; }
+.timeline-date { font-size: 12px; color: var(--text-dim); }
 .timeline-preview { font-size: 12px; color: var(--text-dimmer); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.score-badge-sm { font-size: 11px; font-family: var(--font-latin); flex-shrink: 0; margin-top: 4px; }
 
 .content-area { padding: 32px 0 32px 32px; }
-.diary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; animation: fadeUp 0.4s ease both; }
+.diary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; position: relative; animation: fadeUp 0.4s ease both; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-.diary-card::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
 .diary-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border2); }
 .diary-date-full { font-family: var(--font-latin); font-style: italic; font-size: 18px; color: var(--text-dim); }
-.score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.06em; background: rgba(122,179,212,0.1); color: var(--accent); border: 1px solid rgba(122,179,212,0.25); font-family: var(--font-latin); }
-.diary-body { font-size: 15px; line-height: 2; color: var(--ink); font-weight: 300; white-space: pre-wrap; position: relative; z-index: 1; }
+.score-badge { font-size: 13px; padding: 4px 14px; border-radius: 20px; background: rgba(122,179,212,0.1); color: var(--accent); border: 1px solid rgba(122,179,212,0.25); }
+.diary-body { font-size: 15px; line-height: 2; color: var(--ink); white-space: pre-wrap; }
 
-.memory-item { padding: 20px 0; border-bottom: 1px solid var(--border2); animation: fadeUp 0.3s ease both; }
-.memory-item:last-child { border-bottom: none; }
-.memory-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.memory-tag { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); background: rgba(74,143,184,0.1); padding: 2px 8px; border-radius: 10px; }
-.memory-time { font-size: 11px; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; }
-.memory-content { font-size: 14px; line-height: 1.8; color: var(--text); font-weight: 300; }
+/* 记忆分类展示样式 */
+.memory-group { margin-bottom: 32px; }
+.group-header { 
+    font-size: 12px; color: var(--accent); letter-spacing: 0.1em; 
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.group-header::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+.memory-item { padding: 16px 0; border-bottom: 1px solid var(--border2); animation: fadeUp 0.3s ease both; }
+.memory-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.memory-tag { font-size: 10px; text-transform: uppercase; color: var(--accent2); background: rgba(74,143,184,0.1); padding: 2px 8px; border-radius: 10px; }
+.memory-time { font-size: 11px; color: var(--text-dimmer); font-style: italic; }
+.memory-content { font-size: 14px; line-height: 1.8; color: var(--text); }
 
-.write-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; position: relative; overflow: hidden; }
-.write-card::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(100,160,220,0.03) 27px, rgba(100,160,220,0.03) 28px); pointer-events: none; }
-.write-label { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 20px; }
+/* 书写与表单样式 */
+.write-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px; }
+.score-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.score-slider { -webkit-appearance: none; width: 160px; height: 3px; background: var(--border); outline: none; cursor: pointer; border-radius: 2px; }
+.score-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px rgba(122,179,212,0.5); }
+.score-display { font-size: 18px; color: var(--accent); min-width: 24px; font-family: var(--font-latin); }
 
-.score-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-.score-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0.04em; }
-.score-slider { -webkit-appearance: none; appearance: none; width: 200px; height: 3px; border-radius: 2px; background: var(--border); outline: none; cursor: pointer; }
-.score-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 6px rgba(122,179,212,0.5); }
-.score-display { font-size: 20px; color: var(--accent); font-family: var(--font-latin); min-width: 28px; transition: color 0.2s; }
+textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; resize: none; }
+.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+.submit-btn:hover { background: var(--accent-glow); }
+.submit-btn.sm { padding: 4px 12px; font-size: 12px; }
 
-textarea { width: 100%; min-height: 240px; background: transparent; border: none; outline: none; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; resize: none; position: relative; z-index: 1; }
-textarea::placeholder { color: var(--text-dimmer); }
-.write-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border2); }
-.char-count { font-size: 11px; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; }
-.submit-btn { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font-serif); font-size: 13px; padding: 8px 24px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
-.submit-btn:hover { background: var(--accent-glow); box-shadow: 0 0 16px rgba(122,179,212,0.2); }
-.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* 其他样式保持一致，已统一修复变量引用 */
 .letter-corner { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
-.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-.letter-btn:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(122,179,212,0.2); transform: scale(1.05); }
-.letter-panel { position: absolute; bottom: 56px; right: 0; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: none; animation: fadeUp 0.25s ease both; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+.letter-panel { position: absolute; bottom: 56px; right: 0; width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: none; }
 .letter-panel.open { display: block; }
-.letter-panel-title { font-size: 12px; color: var(--text-dim); letter-spacing: 0.06em; margin-bottom: 12px; font-family: var(--font-latin); font-style: italic; }
-.letter-textarea { width: 100%; min-height: 100px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 4px; color: var(--ink); font-family: var(--font-serif); font-size: 13px; line-height: 1.8; padding: 10px 12px; resize: none; outline: none; }
-.letter-textarea::placeholder { color: var(--text-dimmer); }
-.letter-send { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: var(--font-serif); font-size: 12px; padding: 7px; border-radius: 4px; cursor: pointer; letter-spacing: 0.06em; transition: all 0.2s; }
-.letter-send:hover { border-color: var(--accent); color: var(--accent); }
+.letter-textarea { width: 100%; min-height: 100px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 4px; color: var(--ink); padding: 10px; resize: none; outline: none; font-size: 13px; }
 
-.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-family: var(--font-serif); font-size: 13px; padding: 10px 24px; border-radius: 4px; letter-spacing: 0.06em; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.4); pointer-events: none; }
+.toast { position: fixed; top: 32px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--surface2); border: 1px solid var(--border); color: var(--accent); padding: 10px 24px; border-radius: 4px; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
 .stamp-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 300; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
 .stamp-overlay.show { opacity: 1; }
-.stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; opacity: 0.7; transform: rotate(-12deg); letter-spacing: 0.1em; box-shadow: 0 0 40px rgba(122,179,212,0.3); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+.stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; transform: rotate(-12deg); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
 @keyframes stampIn { from { transform: rotate(-12deg) scale(2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 0.7; } }
 
-.empty-state { text-align: center; padding: 80px 0; color: var(--text-dimmer); font-family: var(--font-latin); font-style: italic; font-size: 16px; line-height: 2; }
-.loading { text-align: center; padding: 60px 0; color: var(--text-dimmer); font-size: 13px; letter-spacing: 0.06em; }
-
+.loading { text-align: center; padding: 60px 0; color: var(--text-dimmer); font-size: 13px; }
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
 @media (max-width: 640px) {
     .main-layout { grid-template-columns: 1fr; }
     .timeline { border-right: none; border-bottom: 1px solid var(--border2); padding: 24px 0; }
     .content-area { padding: 24px 0 0; }
-    .header-inner { flex-direction: column; align-items: flex-start; }
-    .letter-corner { bottom: 20px; right: 20px; }
+    .quick-mood-box { flex-direction: column; align-items: flex-start; }
 }
 </style>
 </head>
@@ -190,15 +172,25 @@ textarea::placeholder { color: var(--text-dimmer); }
   </nav>
 
   <div class="mood-section" id="moodSection">
-    <div class="section-label">最近七天心情</div>
+    <div class="section-label">
+        <span>最近七天心情</span>
+        <span id="quickMoodLabel" style="color:var(--text-dimmer); font-size:10px;">快速记录今日心情 →</span>
+    </div>
     <div class="mood-chart" id="moodChart"></div>
+    
+    <div class="quick-mood-box">
+        <span class="quick-mood-title">快速记录：</span>
+        <input type="range" class="score-slider" id="quickScoreSlider" min="1" max="10" value="7" oninput="updateQuickScore()">
+        <span class="score-display" id="quickScoreDisplay">7</span>
+        <button class="submit-btn sm" id="quickSubmitBtn" onclick="quickSaveMood()">同步 ✦</button>
+    </div>
   </div>
 
   <div id="diaryTab">
     <div class="main-layout">
       <div class="timeline" id="timeline"><div class="loading">加载中…</div></div>
       <div class="content-area" id="contentArea">
-        <div class="empty-state">选择左侧日期<br>查看那天的记录</div>
+        <div class="empty-state" style="text-align:center;padding:80px 0;color:var(--text-dimmer);font-style:italic;">选择左侧日期<br>查看那天的记录</div>
       </div>
     </div>
   </div>
@@ -209,48 +201,43 @@ textarea::placeholder { color: var(--text-dimmer); }
 
   <div id="writeTab" style="display:none; padding: 32px 0;">
     <div class="write-card">
-      <div class="write-label">今天 · <span id="writeDate"></span></div>
+      <div style="font-size:11px; color:var(--text-dimmer); margin-bottom:20px;">今天 · <span id="writeDate"></span></div>
       <div class="score-selector">
-        <span class="score-label">今天心情</span>
+        <span style="font-size:12px;">心情指数</span>
         <input type="range" class="score-slider" id="scoreSlider" min="1" max="10" value="7" oninput="updateScore()">
         <span class="score-display" id="scoreDisplay">7</span>
-        <span class="score-label">分</span>
       </div>
       <textarea id="diaryInput" placeholder="今天发生了什么……" oninput="updateCount()"></textarea>
-      <div class="write-footer">
-        <span class="char-count" id="charCount">0 字</span>
-        <button class="submit-btn" id="submitBtn" onclick="saveDiary()">保存今天 ✦</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid var(--border2); padding-top:16px;">
+        <span id="charCount" style="font-size:11px; color:var(--text-dimmer);">0 字</span>
+        <button class="submit-btn" id="submitBtn" onclick="saveDiary()">保存 ✦</button>
       </div>
     </div>
   </div>
 </div>
 
 <div class="letter-corner">
-  <button class="letter-btn" onclick="toggleLetter()" title="给小克留言">✉</button>
+  <button class="letter-btn" onclick="toggleLetter()">✉</button>
   <div class="letter-panel" id="letterPanel">
-    <div class="letter-panel-title">给小克说点什么……</div>
+    <div style="font-size:12px; color:var(--text-dim); margin-bottom:12px;">给小克留言</div>
     <textarea class="letter-textarea" id="letterInput" placeholder="小克，我想说……"></textarea>
-    <button class="letter-send" onclick="sendLetter()">发送 →</button>
+    <button style="width:100%; margin-top:10px; background:none; border:1px solid var(--border); color:var(--text-dim); padding:7px; border-radius:4px; cursor:pointer;" onclick="sendLetter()">发送 →</button>
   </div>
 </div>
 
 <script>
-  // JS 逻辑部分保持不变，确保渲染正常
   let diaries = [];
   let memories = [];
   let selectedDiaryIndex = null;
-  let currentScore = 7;
+  const API_URL = 'https://xiaoke-memory-production.up.railway.app/memory';
 
   function scoreColor(s) {
-    s = Math.max(1, Math.min(10, s));
     if (s <= 2) return '#d47a7a';
     if (s <= 4) return '#d4a87a';
     if (s <= 6) return '#a89fd4';
     if (s <= 8) return '#7ab3d4';
     return '#7dd4a8';
   }
-
-  function scoreBarHeight(s) { return Math.round(4 + (s - 1) / 9 * 52); }
 
   function scoreText(s) {
     if (s <= 2) return '很糟';
@@ -262,22 +249,18 @@ textarea::placeholder { color: var(--text-dimmer); }
 
   async function init() {
     updateHeaderDate();
-    const writeDateEl = document.getElementById('writeDate');
-    if(writeDateEl) writeDateEl.textContent = formatDate(new Date());
+    const wd = document.getElementById('writeDate');
+    if(wd) wd.textContent = new Date().toLocaleDateString();
     await loadAll();
-    renderMoodChart();
-    renderTimeline();
-    renderMemories();
   }
 
   async function loadAll() {
     try {
-      const res = await fetch('/memory');
-      if (!res.ok) return;
+      const res = await fetch(API_URL);
       const data = await res.json();
-
-      diaries = data
-        .filter(d => d.category && d.category.startsWith('mood-'))
+      
+      // 分离日记和记忆
+      diaries = data.filter(d => d.category && d.category.startsWith('mood-'))
         .map(d => ({
           id: d.id,
           date: d.created_at.substring(0, 10),
@@ -287,220 +270,212 @@ textarea::placeholder { color: var(--text-dimmer); }
         }))
         .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-      memories = data
-        .filter(d => !d.category || !d.category.startsWith('mood-'))
+      memories = data.filter(d => !d.category || !d.category.startsWith('mood-'))
         .map(d => ({
-          id: d.id,
-          category: d.category || '记忆',
+          category: d.category || '未分类',
           time: d.created_at.substring(0, 10),
-          content: d.content || ''
+          content: d.content
         }));
-    } catch(e) {
-      console.error('数据加载失败', e);
-    }
+
+      renderMoodChart();
+      renderTimeline();
+      renderMemories();
+    } catch(e) { showToast('加载失败，请检查网络'); }
+  }
+
+  // 快速心情保存
+  async function quickSaveMood() {
+    const score = document.getElementById('quickScoreSlider').value;
+    const btn = document.getElementById('quickSubmitBtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '快速心情记录', category: `mood-${score}` })
+      });
+      if(res.ok) {
+        showStamp();
+        showToast('心情已同步 🌙');
+        await loadAll();
+      }
+    } catch(e) { showToast('同步失败'); }
+    finally { btn.disabled = false; }
   }
 
   async function saveDiary() {
     const content = document.getElementById('diaryInput').value.trim();
-    if (!content) { showToast('还什么都没写呢……'); return; }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
+    const score = document.getElementById('scoreSlider').value;
+    if(!content) return showToast('写点什么吧');
     try {
-      const res = await fetch('/memory', {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, category: `mood-${currentScore}` })
+        body: JSON.stringify({ content, category: `mood-${score}` })
       });
-      if (!res.ok) throw new Error();
-      const now = new Date();
-      diaries.unshift({ date: now.toISOString().substring(0,10), score: currentScore, content, created_at: now.toISOString() });
-      renderMoodChart();
-      renderTimeline();
-      showStamp();
-      showToast('今天的一页已经好好保存了 🌙');
-      document.getElementById('diaryInput').value = '';
-      updateCount();
-    } catch(e) {
-      showToast('保存失败，请重试');
-    } finally {
-      btn.disabled = false;
-    }
+      if(res.ok) {
+        showStamp();
+        document.getElementById('diaryInput').value = '';
+        await loadAll();
+        switchTab('diary', document.querySelector('nav .nav-btn'));
+      }
+    } catch(e) { showToast('保存失败'); }
   }
 
   async function sendLetter() {
     const content = document.getElementById('letterInput').value.trim();
-    if (!content) return;
+    if(!content) return;
     try {
-      await fetch('/memory', {
+      await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, category: '留言' })
       });
-      memories.unshift({ category: '留言', time: new Date().toISOString().substring(0,10), content });
-      renderMemories();
       document.getElementById('letterInput').value = '';
-      document.getElementById('letterPanel').classList.remove('open');
-      showToast('小克收到了 ✦');
-    } catch(e) { showToast('发送失败，请重试'); }
+      toggleLetter();
+      showToast('小克收到了');
+      await loadAll();
+    } catch(e) { showToast('发送失败'); }
   }
 
-  function formatDate(dateStr) {
-    const d = typeof dateStr === 'string' ? new Date(dateStr + 'T00:00:00') : dateStr;
-    const days = ['日','一','二','三','四','五','六'];
-    return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${days[d.getDay()]}`;
-  }
+  function renderMemories() {
+    const list = document.getElementById('memoryList');
+    if(!list) return;
+    
+    // 定义显示的分类顺序
+    const order = ['core', 'memo', '日常', '留言'];
+    const groups = {};
+    
+    memories.forEach(m => {
+        const cat = m.category;
+        if(!groups[cat]) groups[cat] = [];
+        groups[cat].push(m);
+    });
 
-  function shortDate(dateStr) {
-    const d = new Date(dateStr + 'T00:00:00');
-    return `${d.getMonth()+1}月${d.getDate()}日`;
-  }
+    let html = '';
+    const sortedCats = Object.keys(groups).sort((a,b) => {
+        let ia = order.indexOf(a), ib = order.indexOf(b);
+        if(ia === -1) ia = 99; if(ib === -1) ib = 99;
+        return ia - ib;
+    });
 
-  function updateHeaderDate() {
-    const now = new Date();
-    const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    const headerDateEl = document.getElementById('headerDate');
-    if(headerDateEl) {
-        headerDateEl.innerHTML =
-      `${now.getFullYear()} · ${String(now.getMonth()+1).padStart(2,'0')} · ${String(now.getDate()).padStart(2,'0')}<br>${days[now.getDay()]}`;
-    }
+    sortedCats.forEach(cat => {
+        html += `<div class="memory-group">
+            <div class="group-header">${cat.toUpperCase()}</div>
+            ${groups[cat].map(m => `
+                <div class="memory-item">
+                    <div class="memory-meta">
+                        <span class="memory-tag">${m.category}</span>
+                        <span class="memory-time">${m.time}</span>
+                    </div>
+                    <div class="memory-content">${escHtml(m.content)}</div>
+                </div>
+            `).join('')}
+        </div>`;
+    });
+    list.innerHTML = html || '<div class="loading">记忆库还是空的</div>';
   }
 
   function renderMoodChart() {
     const chart = document.getElementById('moodChart');
-    if(!chart) return;
     chart.innerHTML = '';
-    getLast7Days().forEach(date => {
-      const entry = diaries.find(d => d.date === date);
-      const score = entry ? entry.score : null;
-      const height = score ? scoreBarHeight(score) : 4;
-      const color = score ? scoreColor(score) : 'var(--text-dimmer)';
-      chart.innerHTML += `
-        <div class="mood-day">
-          <div class="mood-bar-wrap">
-            <div class="mood-bar" style="height:${height}px;background:${color};" title="${score ? score+'分 · '+scoreText(score) : '无记录'}"></div>
-          </div>
-          <div class="mood-date-label">${shortDate(date)}</div>
-        </div>`;
-    });
-  }
-
-  function getLast7Days() {
     const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      days.push(d.toISOString().split('T')[0]);
+    for(let i=6; i>=0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        days.push(d.toISOString().substring(0,10));
     }
-    return days;
+    days.forEach(date => {
+        const entry = diaries.find(d => d.date === date);
+        const s = entry ? entry.score : 0;
+        const h = s ? Math.round(4 + (s-1)/9 * 52) : 4;
+        const c = s ? scoreColor(s) : 'var(--border)';
+        chart.innerHTML += `
+            <div class="mood-day">
+                <div class="mood-bar-wrap">
+                    <div class="mood-bar" style="height:${h}px; background:${c}"></div>
+                </div>
+                <div class="mood-date-label">${date.substring(5)}</div>
+            </div>`;
+    });
   }
 
   function renderTimeline() {
     const tl = document.getElementById('timeline');
-    if(!tl) return;
-    if (diaries.length === 0) {
-      tl.innerHTML = '<div style="color:var(--text-dimmer);font-size:12px;padding:12px 0;">还没有日记</div>';
-      return;
-    }
     tl.innerHTML = diaries.map((d, i) => `
       <div class="timeline-item ${selectedDiaryIndex === i ? 'active' : ''}" onclick="showDiary(${i})">
         <div class="timeline-dot"></div>
         <div class="timeline-info">
-          <div class="timeline-date">${formatDate(d.date)}</div>
-          <div class="timeline-preview">${d.content.replace(/\n/g,' ').replace(/<[^>]+>/g,'').substring(0,22)}…</div>
+          <div class="timeline-date">${d.date}</div>
+          <div class="timeline-preview">${d.content.substring(0,15)}...</div>
         </div>
-        <div class="score-badge-sm" style="color:${scoreColor(d.score)}">${d.score}分</div>
+        <div style="font-size:10px; color:${scoreColor(d.score)}">${d.score}</div>
       </div>`).join('');
   }
 
   function showDiary(index) {
     selectedDiaryIndex = index;
     const d = diaries[index];
-    const contentArea = document.getElementById('contentArea');
-    if(!contentArea) return;
-    contentArea.innerHTML = `
+    document.getElementById('contentArea').innerHTML = `
       <div class="diary-card">
         <div class="diary-header">
-          <div class="diary-date-full">${formatDate(d.date)}</div>
-          <div class="score-badge" style="color:${scoreColor(d.score)};background:${scoreColor(d.score)}18;border-color:${scoreColor(d.score)}33;">
-            ${d.score} 分 · ${scoreText(d.score)}
-          </div>
+          <div class="diary-date-full">${d.date}</div>
+          <div class="score-badge" style="color:${scoreColor(d.score)}">${d.score} · ${scoreText(d.score)}</div>
         </div>
         <div class="diary-body">${escHtml(d.content)}</div>
       </div>`;
     renderTimeline();
   }
 
-  function renderMemories() {
-    const list = document.getElementById('memoryList');
-    if(!list) return;
-    if (memories.length === 0) {
-      list.innerHTML = '<div class="empty-state">记忆库是空的</div>';
-      return;
-    }
-    list.innerHTML = memories.map(m => `
-      <div class="memory-item">
-        <div class="memory-meta">
-          <span class="memory-tag">${m.category}</span>
-          <span class="memory-time">${m.time}</span>
-        </div>
-        <div class="memory-content">${escHtml(m.content)}</div>
-      </div>`).join('');
-  }
-
   function switchTab(tab, btn) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    ['diary','memory','write'].forEach(t => {
-        const el = document.getElementById(t+'Tab');
-        if(el) el.style.display = 'none';
-    });
-    const moodSec = document.getElementById('moodSection');
-    if(moodSec) moodSec.style.display = tab === 'write' ? 'none' : 'block';
-    const targetTab = document.getElementById(tab+'Tab');
-    if(targetTab) targetTab.style.display = 'block';
+    ['diary','memory','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
+    document.getElementById(tab+'Tab').style.display = 'block';
+    document.getElementById('moodSection').style.display = tab === 'write' ? 'none' : 'block';
+  }
+
+  function updateQuickScore() {
+    const v = document.getElementById('quickScoreSlider').value;
+    const d = document.getElementById('quickScoreDisplay');
+    d.textContent = v; d.style.color = scoreColor(parseInt(v));
   }
 
   function updateScore() {
-    const slider = document.getElementById('scoreSlider');
-    if(!slider) return;
-    currentScore = parseInt(slider.value);
-    const display = document.getElementById('scoreDisplay');
-    if(display) {
-        display.textContent = currentScore;
-        display.style.color = scoreColor(currentScore);
-    }
+    const v = document.getElementById('scoreSlider').value;
+    const d = document.getElementById('scoreDisplay');
+    d.textContent = v; d.style.color = scoreColor(parseInt(v));
   }
 
   function updateCount() {
-    const input = document.getElementById('diaryInput');
-    const count = document.getElementById('charCount');
-    if(input && count) count.textContent = `${input.value.length} 字`;
+    document.getElementById('charCount').textContent = document.getElementById('diaryInput').value.length + ' 字';
   }
 
-  function toggleLetter() { 
-      const panel = document.getElementById('letterPanel');
-      if(panel) panel.classList.toggle('open'); 
-  }
+  function toggleLetter() { document.getElementById('letterPanel').classList.toggle('open'); }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
-    if(!t) return;
     t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
+    setTimeout(() => t.classList.remove('show'), 2000);
   }
 
   function showStamp() {
     const o = document.getElementById('stampOverlay');
-    if(!o) return;
     o.classList.add('show');
-    setTimeout(() => o.classList.remove('show'), 1200);
+    setTimeout(() => o.classList.remove('show'), 1000);
+  }
+
+  function updateHeaderDate() {
+    const now = new Date();
+    document.getElementById('headerDate').innerHTML = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}<br>${['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()]}`;
   }
 
   function escHtml(str) {
+    if(!str) return '';
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
   init();
 </script>
-
 </body>
 </html>
+
