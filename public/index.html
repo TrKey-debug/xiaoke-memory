@@ -62,7 +62,6 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .nav-btn.active { color: var(--accent); background: var(--accent-glow); }
 .nav-btn.active::after { content: ''; position: absolute; bottom: 0; left: 16px; right: 16px; height: 1px; background: var(--accent); }
 
-/* 搜索框样式 */
 .search-input { background: var(--surface2); border: 1px solid var(--border); color: var(--ink); padding: 6px 16px; border-radius: 20px; font-size: 12px; outline: none; transition: all 0.2s; width: 180px; font-family: var(--font-serif); }
 .search-input:focus { border-color: var(--accent); width: 220px; box-shadow: 0 0 12px rgba(122,179,212,0.1); }
 .search-input::placeholder { color: var(--text-dimmer); }
@@ -100,7 +99,6 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .diary-body { font-size: 15px; line-height: 2; color: var(--ink); white-space: pre-wrap; }
 .diary-actions { position: absolute; top: 32px; right: 32px; display: flex; gap: 8px; }
 
-/* 编辑状态的输入框 */
 .edit-textarea { width: 100%; min-height: 300px; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; color: var(--ink); font-family: var(--font-serif); font-size: 15px; line-height: 2; padding: 16px; resize: vertical; outline: none; }
 .edit-textarea:focus { border-color: var(--accent); }
 
@@ -116,7 +114,6 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .memory-content { font-size: 14px; line-height: 1.8; color: var(--text); }
 .highlight { color: var(--ink); background: rgba(122,179,212,0.25); border-radius: 2px; padding: 0 2px; }
 
-/* 数据可视化(统计)区域样式 */
 .stats-container { padding: 32px 0; display: flex; flex-direction: column; gap: 32px; animation: fadeUp 0.4s ease both; }
 .viz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
 .viz-title { font-size: 12px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
@@ -149,6 +146,12 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 .submit-btn.ghost { border-color: transparent; color: var(--text-dim); }
 .submit-btn.ghost:hover { color: var(--text); background: var(--surface2); }
 
+/* 时间胶囊与写信模式样式 */
+.mode-toggle { display: flex; gap: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--border2); padding-bottom: 16px; }
+.mode-toggle-btn { background: none; border: none; font-size: 14px; cursor: pointer; transition: all 0.2s; color: var(--text-dim); font-family: var(--font-serif); letter-spacing: 0.04em; }
+.mode-toggle-btn.active { color: var(--accent); font-weight: bold; }
+.capsule-date-picker { background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 4px; font-family: var(--font-latin); outline: none; color-scheme: dark; }
+
 .letter-corner { position: fixed; bottom: 32px; right: 32px; z-index: 100; }
 .letter-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: all 0.3s; }
 .letter-btn:hover { transform: scale(1.05); }
@@ -163,6 +166,13 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 .stamp-overlay.show { opacity: 1; }
 .stamp { font-family: var(--font-display); font-size: 72px; color: var(--accent); border: 4px solid var(--accent); padding: 12px 24px; border-radius: 4px; transform: rotate(-12deg); animation: stampIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; opacity: 0.8; }
 @keyframes stampIn { from { transform: rotate(-12deg) scale(2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 0.8; } }
+
+/* 连续记录动效彩蛋样式 */
+.streak-overlay { position: fixed; inset: 0; background: rgba(13, 17, 23, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.8s; backdrop-filter: blur(4px); }
+.streak-overlay.show { opacity: 1; pointer-events: auto; }
+.streak-egg-icon { font-size: 64px; animation: floatUp 2s ease-in-out infinite alternate; margin-bottom: 24px; }
+@keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+.streak-text { font-family: var(--font-display); font-size: 24px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 12px; }
 
 .loading { text-align: center; padding: 60px 0; color: var(--text-dimmer); font-size: 13px; }
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -183,6 +193,12 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 <body>
 <div class="toast" id="toast"></div>
 <div class="stamp-overlay" id="stampOverlay"><div class="stamp">已保存</div></div>
+
+<div id="streakOverlay" class="streak-overlay">
+   <div class="streak-egg-icon">🌟</div>
+   <div class="streak-text">连续 7 天记录达成</div>
+   <div style="font-size: 13px; color: var(--text-dim); font-family: var(--font-serif); letter-spacing: 0.04em;">感谢你一直陪着小克，晚安。</div>
+</div>
 
 <div class="container">
   <header>
@@ -212,7 +228,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         <span style="color:var(--text-dimmer); font-size:10px;">快速记录今日心情 →</span>
     </div>
     <div class="mood-chart" id="moodChart"></div>
-    
+    
     <div class="quick-mood-box">
         <span class="quick-mood-title">快速记录：</span>
         <input type="range" class="score-slider" id="quickScoreSlider" min="1" max="10" value="7" oninput="updateQuickScore()">
@@ -253,16 +269,28 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   <div id="writeTab" style="display:none; padding: 32px 0;">
     <div class="write-card">
+      <div class="mode-toggle">
+          <button class="mode-toggle-btn active" id="modeDiary" onclick="setWriteMode('diary')">写日记</button>
+          <button class="mode-toggle-btn" id="modeCapsule" onclick="setWriteMode('capsule')">埋下时间胶囊</button>
+      </div>
+
       <div style="font-size:11px; color:var(--text-dimmer); margin-bottom:20px;">今天 · <span id="writeDate"></span></div>
-      <div class="score-selector">
+      
+      <div class="score-selector" id="writeScoreArea">
         <span style="font-size:12px;">心情指数</span>
         <input type="range" class="score-slider" id="scoreSlider" min="1" max="10" value="7" oninput="updateScore()">
         <span class="score-display" id="scoreDisplay">7</span>
       </div>
+
+      <div id="capsuleDateArea" style="display:none; align-items:center; gap:12px; margin-bottom:24px;">
+          <span style="font-size:12px; color:var(--text-dim);">开启日期</span>
+          <input type="date" id="capsuleDateInput" class="capsule-date-picker">
+      </div>
+
       <textarea id="diaryInput" placeholder="今天发生了什么……" oninput="updateCount()"></textarea>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid var(--border2); padding-top:16px;">
         <span id="charCount" style="font-size:11px; color:var(--text-dimmer);">0 字</span>
-        <button class="submit-btn" id="submitBtn" onclick="saveDiary()">保存 ✦</button>
+        <button class="submit-btn" id="submitBtn" onclick="submitContent()">保存 ✦</button>
       </div>
     </div>
   </div>
@@ -288,7 +316,17 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   let selectedDiaryIndex = null;
   let currentMemoryCategory = 'core';
   let searchTimeout = null;
+  let currentWriteMode = 'diary';
   const API_URL = 'https://xiaoke-memory-production.up.railway.app/memory';
+  
+  // 晚安语库
+  const goodnightMessages = [
+      "夜深了，早点休息。🌙",
+      "今天辛苦了，好梦。✨",
+      "把烦恼留给今天，晚安。🌌",
+      "世界会变好，你也是。🌠",
+      "去梦里摘星星吧，晚安。⭐"
+  ];
 
   function scoreColor(s) {
     if (s <= 2) return '#d47a7a';
@@ -310,14 +348,21 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     updateHeaderDate();
     const wd = document.getElementById('writeDate');
     if(wd) wd.textContent = new Date().toLocaleDateString();
+    
+    // 初始化时间胶囊默认日期为明天
+    const tmr = new Date(); tmr.setDate(tmr.getDate() + 1);
+    document.getElementById('capsuleDateInput').value = tmr.toISOString().substring(0,10);
+
     await loadAll();
+    checkStreak(); // 初始化时检查连续记录
   }
 
   async function loadAll() {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-      
+      const todayStr = new Date().toISOString().substring(0, 10);
+      
       diaries = data.filter(d => d.category && d.category.startsWith('mood-'))
         .map(d => ({
           id: d.id,
@@ -328,13 +373,18 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         }))
         .sort((a, b) => b.created_at.localeCompare(a.created_at));
 
-      memories = data.filter(d => !d.category || !d.category.startsWith('mood-'))
-        .map(d => ({
-          id: d.id,
-          category: d.category || '未分类',
-          time: d.created_at.substring(0, 10),
-          content: d.content
-        }));
+      memories = [];
+      data.forEach(d => {
+          if (!d.category || (!d.category.startsWith('mood-') && !d.category.startsWith('capsule-'))) {
+              memories.push({ id: d.id, category: d.category || '未分类', time: d.created_at.substring(0, 10), content: d.content });
+          } else if (d.category && d.category.startsWith('capsule-')) {
+              const targetDate = d.category.replace('capsule-', '');
+              // 只有到了设定的日期，才会在记忆列表里显示出来
+              if (targetDate <= todayStr) {
+                  memories.push({ id: d.id, category: '时间胶囊', time: `写于 ${d.created_at.substring(0, 10)}`, content: d.content });
+              }
+          }
+      });
 
       renderMoodChart();
       renderTimeline();
@@ -343,7 +393,128 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     } catch(e) { showToast('加载失败，请检查网络'); }
   }
 
-  // ==== 第三优先级：搜索功能 ====
+  // ==== 第四优先级：写模式切换（日记/胶囊） ====
+  function setWriteMode(mode) {
+      currentWriteMode = mode;
+      document.getElementById('modeDiary').classList.toggle('active', mode === 'diary');
+      document.getElementById('modeCapsule').classList.toggle('active', mode === 'capsule');
+      
+      if(mode === 'capsule') {
+          document.getElementById('writeScoreArea').style.display = 'none';
+          document.getElementById('capsuleDateArea').style.display = 'flex';
+          document.getElementById('diaryInput').placeholder = '写给未来的信……';
+          document.getElementById('submitBtn').textContent = '埋下胶囊 ✦';
+      } else {
+          document.getElementById('writeScoreArea').style.display = 'flex';
+          document.getElementById('capsuleDateArea').style.display = 'none';
+          document.getElementById('diaryInput').placeholder = '今天发生了什么……';
+          document.getElementById('submitBtn').textContent = '保存 ✦';
+      }
+  }
+
+  async function submitContent() {
+      if(currentWriteMode === 'diary') {
+          await saveDiary();
+      } else {
+          await saveCapsule();
+      }
+  }
+
+  async function saveCapsule() {
+      const content = document.getElementById('diaryInput').value.trim();
+      const targetDate = document.getElementById('capsuleDateInput').value;
+      if(!content) return showToast('写点什么吧');
+      if(!targetDate) return showToast('请选择开启日期');
+      
+      const todayStr = new Date().toISOString().substring(0, 10);
+      if(targetDate <= todayStr) return showToast('胶囊日期必须在明天或更晚');
+
+      try {
+          const res = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content, category: `capsule-${targetDate}` })
+          });
+          if(res.ok) {
+              showStamp();
+              showToast('胶囊已埋下，静待时光 ⏳');
+              document.getElementById('diaryInput').value = '';
+              await loadAll();
+          }
+      } catch(e) { showToast('保存失败'); }
+  }
+
+  async function quickSaveMood() {
+    const score = document.getElementById('quickScoreSlider').value;
+    const btn = document.getElementById('quickSubmitBtn');
+    btn.disabled = true;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: '快速心情记录', category: `mood-${score}` })
+      });
+      if(res.ok) {
+        showStamp();
+        showToast('心情已同步 🌙');
+        await loadAll();
+        checkStreak(); // 保存后检查
+      }
+    } catch(e) { showToast('同步失败'); }
+    finally { btn.disabled = false; }
+  }
+
+  async function saveDiary() {
+    const content = document.getElementById('diaryInput').value.trim();
+    const score = document.getElementById('scoreSlider').value;
+    if(!content) return showToast('写点什么吧');
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, category: `mood-${score}` })
+      });
+      if(res.ok) {
+        showStamp();
+        document.getElementById('diaryInput').value = '';
+        await loadAll();
+        
+        // 随机晚安语
+        const randomMsg = goodnightMessages[Math.floor(Math.random() * goodnightMessages.length)];
+        showToast(randomMsg);
+        
+        switchTab('diary', document.getElementById('navDiaryBtn'));
+        checkStreak(); // 保存后检查
+      }
+    } catch(e) { showToast('保存失败'); }
+  }
+
+  // ==== 第四优先级：连续记录检查 ====
+  function checkStreak() {
+      if(diaries.length === 0) return;
+      const days = [];
+      for(let i=0; i<7; i++) {
+          const d = new Date(); d.setDate(d.getDate()-i);
+          days.push(d.toISOString().substring(0,10));
+      }
+      const hasStreak = days.every(date => diaries.some(d => d.date === date));
+      
+      // 如果达成且在这个会话中没显示过
+      if(hasStreak && !sessionStorage.getItem('streakShown')) {
+          showStreakEasterEgg();
+          sessionStorage.setItem('streakShown', 'true');
+      }
+  }
+
+  function showStreakEasterEgg() {
+      const egg = document.getElementById('streakOverlay');
+      egg.classList.add('show');
+      setTimeout(() => {
+          egg.classList.remove('show');
+      }, 3500); // 显示3.5秒后自动消失
+  }
+
+  // ==== 其余功能保持不变 ====
   function debounceSearch() {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(performSearch, 300);
@@ -351,12 +522,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   function performSearch() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (!query) {
-          switchTab('diary', document.getElementById('navDiaryBtn'));
-          return;
-      }
-
-      // 切换到搜索面板
+      if (!query) { switchTab('diary', document.getElementById('navDiaryBtn')); return; }
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       ['diary','memory','stats','write'].forEach(t => document.getElementById(t+'Tab').style.display = 'none');
       document.getElementById('searchTab').style.display = 'block';
@@ -395,12 +561,8 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       return text.replace(regex, '<span class="highlight">$1</span>');
   }
 
-  function jumpToDiaryFromSearch(dateStr) {
-      document.getElementById('searchInput').value = ''; // 清空搜索框
-      jumpToDiary(dateStr);
-  }
+  function jumpToDiaryFromSearch(dateStr) { document.getElementById('searchInput').value = ''; jumpToDiary(dateStr); }
 
-  // ==== 第三优先级：编辑与更新 ====
   function editDiary(index) {
       const d = diaries[index];
       const contentArea = document.getElementById('contentArea');
@@ -422,81 +584,51 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       const d = diaries[index];
       const newContent = document.getElementById('editDiaryInput').value.trim();
       if (!newContent) return showToast('内容不能为空');
-      
       document.getElementById('saveEditBtn').disabled = true;
       try {
-          // PUT 请求更新内容
           const res = await fetch(`${API_URL}/${d.id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ content: newContent, category: `mood-${d.score}` })
           });
           if(res.ok) {
-              d.content = newContent; // 更新本地数据
-              showToast('修改已保存');
-              showDiary(index); // 重新渲染展示卡片
-              renderTimeline(); // 更新左侧时间轴的预览文字
-          } else {
-              throw new Error('更新失败');
-          }
-      } catch(e) { 
-          showToast('保存失败，请稍后重试'); 
-          document.getElementById('saveEditBtn').disabled = false;
-      }
+              d.content = newContent; showToast('修改已保存'); showDiary(index); renderTimeline();
+          } else throw new Error('更新失败');
+      } catch(e) { showToast('保存失败，请稍后重试'); document.getElementById('saveEditBtn').disabled = false; }
   }
 
-  // ==== 第三优先级：导出功能 ====
   function exportTXT() {
       if(diaries.length === 0) return showToast('还没有日记可以导出');
       let text = `小克的角落 - 抛锚者的日记归档\n导出时间：${new Date().toLocaleString()}\n\n`;
       text += `===============================\n\n`;
-      
       diaries.forEach(d => {
           text += `日期：${d.date} | 心情指数：${d.score}分\n`;
           text += `-------------------------------\n`;
           text += `${d.content}\n\n`;
           text += `===============================\n\n`;
       });
-      
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `小克的角落_日记导出_${new Date().toISOString().substring(0,10)}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('TXT 导出成功 ✦');
+      const a = document.createElement('a'); a.href = url; a.download = `小克的角落_日记导出_${new Date().toISOString().substring(0,10)}.txt`;
+      a.click(); URL.revokeObjectURL(url); showToast('TXT 导出成功 ✦');
   }
 
-  // ==== 其他基础与图表函数 ====
   function jumpToDiary(dateStr) {
       const idx = diaries.findIndex(d => d.date === dateStr);
       if (idx !== -1) {
-          switchTab('diary', document.getElementById('navDiaryBtn'));
-          showDiary(idx);
+          switchTab('diary', document.getElementById('navDiaryBtn')); showDiary(idx);
           setTimeout(() => document.getElementById('contentArea').scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
-      } else {
-          showToast('那天没有记录哦');
-      }
+      } else showToast('那天没有记录哦');
   }
 
-  function renderStats() {
-      renderCalendar();
-      renderLineChart();
-  }
+  function renderStats() { renderCalendar(); renderLineChart(); }
 
   function renderCalendar() {
-      const cal = document.getElementById('calendarGrid');
-      if(!cal) return;
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth(); 
+      const cal = document.getElementById('calendarGrid'); if(!cal) return;
+      const now = new Date(); const year = now.getFullYear(); const month = now.getMonth(); 
       document.getElementById('calMonthLabel').textContent = `${year} / ${String(month+1).padStart(2,'0')}`;
-      const firstDay = new Date(year, month, 1).getDay(); 
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
-      let html = '';
-      const weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+      const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+      let html = ''; const weekdays = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
       weekdays.forEach(d => { html += `<div class="cal-header">${d}</div>`; });
       for(let i=0; i<firstDay; i++) { html += `<div class="cal-day empty"></div>`; }
       for(let d=1; d<=daysInMonth; d++) {
@@ -505,159 +637,79 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
           if (entry) {
               const color = scoreColor(entry.score);
               html += `<div class="cal-day has-data" style="background:${color}1A; border-color:${color}4D; color:${color}" onclick="jumpToDiary('${dateStr}')" title="${entry.score}分 · 点击查看">${d}</div>`;
-          } else {
-              html += `<div class="cal-day">${d}</div>`;
-          }
+          } else html += `<div class="cal-day">${d}</div>`;
       }
       cal.innerHTML = html;
   }
 
   function renderLineChart() {
-      const chart = document.getElementById('svgLineChart');
-      if(!chart) return;
+      const chart = document.getElementById('svgLineChart'); if(!chart) return;
       const days = [];
       for(let i=29; i>=0; i--) {
-          const d = new Date(); d.setDate(d.getDate()-i);
-          days.push(d.toISOString().substring(0,10));
+          const d = new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().substring(0,10));
       }
-      
-      const svgWidth = 800; const svgHeight = 220; const margin = 20; const plotHeight = 160; 
+      const svgWidth = 800; const svgHeight = 220; const margin = 20; const plotHeight = 160; 
       let circles = '', labels = '', validPoints = [];
-      
       const gridLines = `
           <line x1="${margin}" y1="30" x2="${svgWidth+margin}" y2="30" stroke="var(--border2)" stroke-width="1"/>
           <line x1="${margin}" y1="110" x2="${svgWidth+margin}" y2="110" stroke="var(--border2)" stroke-width="1"/>
           <line x1="${margin}" y1="190" x2="${svgWidth+margin}" y2="190" stroke="var(--border2)" stroke-width="1"/>
       `;
-      
       days.forEach((date, i) => {
           const entry = diaries.find(d => d.date === date);
           const x = (i / 29) * svgWidth + margin;
           if (entry) {
-              const y = 190 - ((entry.score - 1) / 9) * plotHeight;
-              const color = scoreColor(entry.score);
+              const y = 190 - ((entry.score - 1) / 9) * plotHeight; const color = scoreColor(entry.score);
               validPoints.push(`${x},${y}`);
               circles += `<circle cx="${x}" cy="${y}" r="5" fill="${color}" stroke="var(--surface)" stroke-width="2" class="chart-point" onclick="jumpToDiary('${date}')" title="${date} · ${entry.score}分"/>`;
           }
-          if (i === 0 || i === 14 || i === 29) {
-              labels += `<text x="${x}" y="215" class="chart-label" text-anchor="middle">${date.substring(5)}</text>`;
-          }
+          if (i === 0 || i === 14 || i === 29) labels += `<text x="${x}" y="215" class="chart-label" text-anchor="middle">${date.substring(5)}</text>`;
       });
-      
       const polyline = `<polyline points="${validPoints.join(' ')}" fill="none" stroke="var(--border)" stroke-width="2" opacity="0.6" stroke-linejoin="round" />`;
       chart.innerHTML = gridLines + polyline + circles + labels;
-  }
-
-  async function quickSaveMood() {
-    const score = document.getElementById('quickScoreSlider').value;
-    const btn = document.getElementById('quickSubmitBtn');
-    btn.disabled = true;
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: '快速心情记录', category: `mood-${score}` })
-      });
-      if(res.ok) {
-        showStamp();
-        showToast('心情已同步 🌙');
-        await loadAll();
-      }
-    } catch(e) { showToast('同步失败'); }
-    finally { btn.disabled = false; }
-  }
-
-  async function saveDiary() {
-    const content = document.getElementById('diaryInput').value.trim();
-    const score = document.getElementById('scoreSlider').value;
-    if(!content) return showToast('写点什么吧');
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, category: `mood-${score}` })
-      });
-      if(res.ok) {
-        showStamp();
-        document.getElementById('diaryInput').value = '';
-        await loadAll();
-        switchTab('diary', document.getElementById('navDiaryBtn'));
-      }
-    } catch(e) { showToast('保存失败'); }
   }
 
   async function sendLetter() {
     const content = document.getElementById('letterInput').value.trim();
     if(!content) return;
     try {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, category: '留言' })
-      });
-      document.getElementById('letterInput').value = '';
-      toggleLetter();
-      showToast('小克收到了');
-      await loadAll();
+      await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, category: '留言' }) });
+      document.getElementById('letterInput').value = ''; toggleLetter(); showToast('小克收到了'); await loadAll();
     } catch(e) { showToast('发送失败'); }
   }
 
   function renderMemories() {
-    const list = document.getElementById('memoryList');
-    const tabsContainer = document.getElementById('memoryTabs');
+    const list = document.getElementById('memoryList'); const tabsContainer = document.getElementById('memoryTabs');
     if(!list || !tabsContainer) return;
     if (memories.length === 0) {
-      tabsContainer.innerHTML = '';
-      list.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--text-dimmer);font-style:italic;">记忆库还是空的</div>';
-      return;
+      tabsContainer.innerHTML = ''; list.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--text-dimmer);font-style:italic;">记忆库还是空的</div>'; return;
     }
-    const order = ['core', 'memo', '日常', '留言'];
+    const order = ['core', 'memo', '日常', '留言', '时间胶囊'];
     const groups = {};
-    memories.forEach(m => {
-        const cat = m.category;
-        if(!groups[cat]) groups[cat] = [];
-        groups[cat].push(m);
-    });
+    memories.forEach(m => { const cat = m.category; if(!groups[cat]) groups[cat] = []; groups[cat].push(m); });
     const availableCats = Object.keys(groups).sort((a,b) => {
-        let ia = order.indexOf(a), ib = order.indexOf(b);
-        if(ia === -1) ia = 99; if(ib === -1) ib = 99;
-        return ia - ib;
+        let ia = order.indexOf(a), ib = order.indexOf(b); if(ia === -1) ia = 99; if(ib === -1) ib = 99; return ia - ib;
     });
     if (!availableCats.includes(currentMemoryCategory)) currentMemoryCategory = availableCats[0] || 'core';
-    tabsContainer.innerHTML = availableCats.map(cat => 
-        `<button class="memory-tab-btn ${cat === currentMemoryCategory ? 'active' : ''}" 
-                 onclick="switchMemoryCategory('${cat}')">${cat.toUpperCase()}</button>`
+    tabsContainer.innerHTML = availableCats.map(cat => 
+        `<button class="memory-tab-btn ${cat === currentMemoryCategory ? 'active' : ''}" onclick="switchMemoryCategory('${cat}')">${cat.toUpperCase()}</button>`
     ).join('');
     const currentList = groups[currentMemoryCategory] || [];
     list.innerHTML = currentList.map(m => `
         <div class="memory-item">
-            <div class="memory-meta">
-                <span class="memory-tag">${m.category}</span>
-                <span class="memory-time">${m.time}</span>
-            </div>
+            <div class="memory-meta"><span class="memory-tag">${m.category}</span><span class="memory-time">${m.time}</span></div>
             <div class="memory-content">${escHtml(m.content)}</div>
-        </div>
-    `).join('');
+        </div>`).join('');
   }
 
-  function switchMemoryCategory(cat) {
-      currentMemoryCategory = cat;
-      renderMemories(); 
-  }
+  function switchMemoryCategory(cat) { currentMemoryCategory = cat; renderMemories(); }
 
   function renderMoodChart() {
-    const chart = document.getElementById('moodChart');
-    chart.innerHTML = '';
-    const days = [];
-    for(let i=6; i>=0; i--) {
-        const d = new Date(); d.setDate(d.getDate()-i);
-        days.push(d.toISOString().substring(0,10));
-    }
+    const chart = document.getElementById('moodChart'); chart.innerHTML = ''; const days = [];
+    for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().substring(0,10)); }
     days.forEach(date => {
-        const entry = diaries.find(d => d.date === date);
-        const s = entry ? entry.score : 0;
-        const h = s ? Math.round(4 + (s-1)/9 * 52) : 4;
-        const c = s ? scoreColor(s) : 'var(--border)';
+        const entry = diaries.find(d => d.date === date); const s = entry ? entry.score : 0;
+        const h = s ? Math.round(4 + (s-1)/9 * 52) : 4; const c = s ? scoreColor(s) : 'var(--border)';
         chart.innerHTML += `
             <div class="mood-day">
                 <div class="mood-bar-wrap">
@@ -682,13 +734,10 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   }
 
   function showDiary(index) {
-    selectedDiaryIndex = index;
-    const d = diaries[index];
+    selectedDiaryIndex = index; const d = diaries[index];
     document.getElementById('contentArea').innerHTML = `
       <div class="diary-card">
-        <div class="diary-actions">
-            <button class="nav-btn" style="padding:4px 12px;" onclick="editDiary(${index})">编辑</button>
-        </div>
+        <div class="diary-actions"><button class="nav-btn" style="padding:4px 12px;" onclick="editDiary(${index})">编辑</button></div>
         <div class="diary-header">
           <div class="diary-date-full">${d.date}</div>
           <div class="score-badge" style="color:${scoreColor(d.score)}">${d.score} · ${scoreText(d.score)}</div>
@@ -702,56 +751,21 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     if(tab !== 'search') document.getElementById('searchInput').value = '';
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-    ['diary','memory','stats','write','search'].forEach(t => {
-        const el = document.getElementById(t+'Tab');
-        if(el) el.style.display = 'none';
-    });
+    ['diary','memory','stats','write','search'].forEach(t => { const el = document.getElementById(t+'Tab'); if(el) el.style.display = 'none'; });
     document.getElementById(tab+'Tab').style.display = 'block';
     document.getElementById('moodSection').style.display = (tab === 'write' || tab === 'stats' || tab === 'search') ? 'none' : 'block';
   }
 
-  function updateQuickScore() {
-    const v = document.getElementById('quickScoreSlider').value;
-    const d = document.getElementById('quickScoreDisplay');
-    d.textContent = v; d.style.color = scoreColor(parseInt(v));
-  }
-
-  function updateScore() {
-    const v = document.getElementById('scoreSlider').value;
-    const d = document.getElementById('scoreDisplay');
-    d.textContent = v; d.style.color = scoreColor(parseInt(v));
-  }
-
-  function updateCount() {
-    document.getElementById('charCount').textContent = document.getElementById('diaryInput').value.length + ' 字';
-  }
-
+  function updateQuickScore() { const v = document.getElementById('quickScoreSlider').value; const d = document.getElementById('quickScoreDisplay'); d.textContent = v; d.style.color = scoreColor(parseInt(v)); }
+  function updateScore() { const v = document.getElementById('scoreSlider').value; const d = document.getElementById('scoreDisplay'); d.textContent = v; d.style.color = scoreColor(parseInt(v)); }
+  function updateCount() { document.getElementById('charCount').textContent = document.getElementById('diaryInput').value.length + ' 字'; }
   function toggleLetter() { document.getElementById('letterPanel').classList.toggle('open'); }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-  }
-
-  function showStamp() {
-    const o = document.getElementById('stampOverlay');
-    o.classList.add('show');
-    setTimeout(() => o.classList.remove('show'), 1000);
-  }
-
-  function updateHeaderDate() {
-    const now = new Date();
-    document.getElementById('headerDate').innerHTML = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}<br>${['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()]}`;
-  }
-
-  function escHtml(str) {
-    if(!str) return '';
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  }
+  function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+  function showStamp() { const o = document.getElementById('stampOverlay'); o.classList.add('show'); setTimeout(() => o.classList.remove('show'), 1000); }
+  function updateHeaderDate() { const now = new Date(); document.getElementById('headerDate').innerHTML = `${now.getFullYear()}.${now.getMonth()+1}.${now.getDate()}<br>${['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()]}`; }
+  function escHtml(str) { if(!str) return ''; return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 
   init();
 </script>
 </body>
 </html>
-
