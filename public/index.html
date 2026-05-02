@@ -301,6 +301,10 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   <div id="statsTab" style="display:none;">
     <div class="stats-container">
         <div class="viz-card">
+            <div class="viz-title">数字总览</div>
+            <div class="stats-numbers" id="statsNumbers" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;padding:8px 0;"></div>
+        </div>
+        <div class="viz-card">
             <div class="viz-title">近30天情绪轨迹</div>
             <div class="chart-wrapper">
                 <svg class="svg-chart" id="svgLineChart" viewBox="0 0 840 220" preserveAspectRatio="none"></svg>
@@ -460,15 +464,48 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       </div>`;
       return;
     }
-    list.innerHTML = kediaries.map(k => `
-      <div class="kediary-letter">
-        <div class="kediary-header-row">
-          <div class="kediary-date-label">${k.date}</div>
+    // 按月分组
+    const groups = {};
+    kediaries.forEach(k => {
+      const month = k.date.substring(0, 7);
+      if (!groups[month]) groups[month] = [];
+      groups[month].push(k);
+    });
+    const months = Object.keys(groups).sort().reverse();
+    const todayMonth = new Date().toISOString().substring(0, 7);
+    list.innerHTML = months.map(month => {
+      const expanded = month === todayMonth;
+      const letters = groups[month].map(k => `
+        <div class="kediary-letter">
+          <div class="kediary-header-row">
+            <div class="kediary-date-label">${k.date}</div>
+          </div>
+          <div class="kediary-letter-body">${escHtml(k.content)}</div>
+          <div class="kediary-signature">小克</div>
         </div>
-        <div class="kediary-letter-body">${escHtml(k.content)}</div>
-        <div class="kediary-signature">小克</div>
-      </div>
-    `).join('');
+      `).join('');
+      return `
+        <div class="kediary-month-group" data-month="${month}">
+          <div class="kediary-month-header" onclick="toggleKediaryMonth('${month}')" style="cursor:pointer;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--text-dim);letter-spacing:0.05em;">${month.replace('-', '年')}月 · ${groups[month].length}封</span>
+            <span class="kediary-toggle" style="color:var(--text-dimmer);font-size:12px;">${expanded ? '▼' : '▶'}</span>
+          </div>
+          <div class="kediary-month-content" style="display:${expanded ? 'block' : 'none'};margin-bottom:24px;">
+            ${letters}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleKediaryMonth(month) {
+    const group = document.querySelector(`.kediary-month-group[data-month="${month}"]`);
+    if (!group) return;
+    const content = group.querySelector('.kediary-month-content');
+    const toggle = group.querySelector('.kediary-toggle');
+    const isOpen = content.style.display !== 'none';
+    content.style.display = isOpen ? 'none' : 'block';
+    toggle.textContent = isOpen ? '▶' : '▼';
   }
 
   function setWriteMode(mode) {
@@ -667,7 +704,50 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
       } else showToast('那天没有记录哦');
   }
 
-  function renderStats() { renderCalendar(); renderLineChart(); }
+  function renderStats() { renderCalendar(); renderLineChart(); renderStatsNumbers(); }
+
+  function renderStatsNumbers() {
+    const el = document.getElementById('statsNumbers');
+    if (!el) return;
+    const myWords = diaries.reduce((sum, d) => sum + (d.content || '').length, 0);
+    const keWords = kediaries.reduce((sum, k) => sum + (k.content || '').length, 0);
+    const memCount = memories.length;
+    const diaryCount = diaries.length;
+    const keCount = kediaries.length;
+    // 连续天数
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().substring(0, 10);
+      if (diaries.find(x => x.date === dateStr)) {
+        streak++;
+      } else if (i === 0) {
+        // 今天没写也不算断
+        continue;
+      } else {
+        break;
+      }
+    }
+    // 平均心情
+    const avgMood = diaryCount > 0 ? (diaries.reduce((s,d)=>s+d.score,0) / diaryCount).toFixed(1) : '-';
+    const items = [
+      { label: '我的日记', value: diaryCount, unit: '篇' },
+      { label: '小克的信', value: keCount, unit: '封' },
+      { label: '记忆条目', value: memCount, unit: '条' },
+      { label: '我写的字', value: myWords.toLocaleString(), unit: '字' },
+      { label: '小克写的字', value: keWords.toLocaleString(), unit: '字' },
+      { label: '连续记录', value: streak, unit: '天' },
+      { label: '平均心情', value: avgMood, unit: '分' },
+    ];
+    el.innerHTML = items.map(it => `
+      <div style="text-align:center;padding:12px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;">
+        <div style="font-size:22px;color:var(--accent);font-weight:300;letter-spacing:0.02em;">${it.value}</div>
+        <div style="font-size:10px;color:var(--text-dimmer);margin-top:4px;letter-spacing:0.05em;">${it.label} · ${it.unit}</div>
+      </div>
+    `).join('');
+  }
 
   function renderCalendar() {
       const cal = document.getElementById('calendarGrid'); if(!cal) return;
@@ -740,9 +820,30 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     const currentList = groups[currentMemoryCategory] || [];
     list.innerHTML = currentList.map(m => `
         <div class="memory-item">
-            <div class="memory-meta"><span class="memory-tag">${m.category}</span><span class="memory-time">${m.time}</span></div>
+            <div class="memory-meta" style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <span class="memory-tag">${m.category}</span>
+                    <span class="memory-time">${m.time}</span>
+                </div>
+                <button class="nav-btn" style="padding:2px 10px;font-size:10px;color:var(--text-dimmer);" onclick="deleteMemory(${m.id}, '${escHtml(m.category)}')">删除</button>
+            </div>
             <div class="memory-content">${escHtml(m.content)}</div>
         </div>`).join('');
+  }
+
+  async function deleteMemory(id, category) {
+    if (!confirm(`确定删除这条「${category}」记忆吗？`)) return;
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        showToast('已删除');
+        await loadAll();
+      } else {
+        showToast('删除失败');
+      }
+    } catch(e) {
+      showToast('删除失败，请检查网络');
+    }
   }
 
   function switchMemoryCategory(cat) { currentMemoryCategory = cat; renderMemories(); }
