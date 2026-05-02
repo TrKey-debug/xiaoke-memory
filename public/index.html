@@ -260,8 +260,14 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   <div class="mood-section" id="moodSection">
     <div class="section-label">
-        <span>最近七天心情</span>
+        <span id="moodSectionTitle">最近七天心情</span>
         <span style="color:var(--text-dimmer); font-size:10px;">快速记录今日心情 →</span>
+    </div>
+    <div class="mood-nav" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <button class="nav-btn" style="padding:4px 12px;font-size:11px;" onclick="changeMoodView(-1)">‹</button>
+        <span id="moodViewLabel" style="font-size:12px;color:var(--text-dim);min-width:120px;text-align:center;">最近七天</span>
+        <button class="nav-btn" style="padding:4px 12px;font-size:11px;" onclick="changeMoodView(1)">›</button>
+        <button class="nav-btn" style="padding:4px 10px;font-size:10px;margin-left:auto;" onclick="toggleMoodMode()" id="moodModeBtn">切换月视图</button>
     </div>
     <div class="mood-chart" id="moodChart"></div>
     
@@ -741,18 +747,60 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
 
   function switchMemoryCategory(cat) { currentMemoryCategory = cat; renderMemories(); }
 
+  let moodViewMode = 'week';
+  let moodViewOffset = 0;
+
+  function changeMoodView(delta) {
+    moodViewOffset += delta;
+    if (moodViewOffset > 0) moodViewOffset = 0;
+    renderMoodChart();
+  }
+
+  function toggleMoodMode() {
+    moodViewMode = moodViewMode === 'week' ? 'month' : 'week';
+    moodViewOffset = 0;
+    document.getElementById('moodModeBtn').textContent = moodViewMode === 'week' ? '切换月视图' : '切换周视图';
+    renderMoodChart();
+  }
+
   function renderMoodChart() {
-    const chart = document.getElementById('moodChart'); chart.innerHTML = ''; const days = [];
-    for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().substring(0,10)); }
+    const chart = document.getElementById('moodChart'); chart.innerHTML = '';
+    const label = document.getElementById('moodViewLabel');
+    const title = document.getElementById('moodSectionTitle');
+    const days = [];
+
+    if (moodViewMode === 'week') {
+      const baseDate = new Date();
+      baseDate.setDate(baseDate.getDate() + moodViewOffset * 7);
+      for(let i=6; i>=0; i--) { const d = new Date(baseDate); d.setDate(d.getDate()-i); days.push(d.toISOString().substring(0,10)); }
+      const startStr = days[0].substring(5);
+      const endStr = days[6].substring(5);
+      label.textContent = moodViewOffset === 0 ? '最近七天' : `${startStr} ~ ${endStr}`;
+      title.textContent = moodViewOffset === 0 ? '最近七天心情' : '七天心情';
+    } else {
+      const today = new Date();
+      const targetMonth = new Date(today.getFullYear(), today.getMonth() + moodViewOffset, 1);
+      const year = targetMonth.getFullYear();
+      const month = targetMonth.getMonth();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        const d = new Date(year, month, i);
+        days.push(d.toISOString().substring(0,10));
+      }
+      label.textContent = `${year}年${month+1}月`;
+      title.textContent = `${year}年${month+1}月心情`;
+    }
+
     days.forEach(date => {
         const entry = diaries.find(d => d.date === date); const s = entry ? entry.score : 0;
         const h = s ? Math.round(4 + (s-1)/9 * 52) : 4; const c = s ? scoreColor(s) : 'var(--border)';
+        const labelText = moodViewMode === 'week' ? date.substring(5) : date.substring(8);
         chart.innerHTML += `
             <div class="mood-day">
                 <div class="mood-bar-wrap">
-                    <div class="mood-bar" style="height:${h}px; background:${c}" onclick="${s ? `jumpToDiary('${date}')` : ''}" title="${s ? s+'分' : '无记录'}"></div>
+                    <div class="mood-bar" style="height:${h}px; background:${c}" onclick="${s ? `jumpToDiary('${date}')` : ''}" title="${date} ${s ? s+'分' : '无记录'}"></div>
                 </div>
-                <div class="mood-date-label">${date.substring(5)}</div>
+                <div class="mood-date-label">${labelText}</div>
             </div>`;
     });
   }
