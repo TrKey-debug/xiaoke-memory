@@ -80,6 +80,21 @@ app.get('/memory', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.put('/memory/:id', async (req, res) => {
+  try {
+    const { content, category } = req.body;
+    await pool.query('UPDATE memories SET content = $1, category = $2 WHERE id = $3', [content, category, req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/memory/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM memories WHERE id = $1', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // --- MCP 核心 ---
 
 const MCP_TOOLS = [
