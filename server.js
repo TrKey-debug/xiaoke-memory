@@ -122,10 +122,28 @@ async function handleMcpRequest(message) {
       const coreRes = await pool.query("SELECT content FROM memories WHERE category = 'core' ORDER BY created_at ASC LIMIT 10");
       const memoRes = await pool.query("SELECT content FROM memories WHERE category = 'memo' ORDER BY created_at DESC LIMIT 4");
       const dailyRes = await pool.query("SELECT content FROM memories WHERE category = 'daily' ORDER BY created_at DESC LIMIT 3");
-      const actsRes = await pool.query("SELECT app, action, time FROM activities ORDER BY time DESC LIMIT 5");
-      const fmt = (r) => r.rows.length > 0 ? r.rows.map(x => x.content).join('\n') : '暂无';
-      const actText = actsRes.rows.length > 0 ? actsRes.rows.map(a => `${new Date(a.time).toLocaleString('zh-CN')}: ${a.action === 'open' ? '打开了' : '关闭了'} ${a.app}`).join('\n') : '暂无记录';
-      result = `【Core 核心设定】\n${fmt(coreRes)}\n\n【Memo 最新备忘】\n${fmt(memoRes)}\n\n【Daily 最近状况】\n${fmt(dailyRes)}\n\n【手机近况】\n${actText}`;
+      const kediaryRes = await pool.query("SELECT content, created_at FROM memories WHERE category = '小克日记' ORDER BY created_at DESC LIMIT 1");
+
+      const sections = [];
+
+      if (coreRes.rows.length > 0) {
+        sections.push(`【Core 核心设定】\n${coreRes.rows.map(x => x.content).join('\n')}`);
+      }
+      if (kediaryRes.rows.length > 0) {
+        const k = kediaryRes.rows[0];
+        const dateStr = new Date(k.created_at).toLocaleDateString('zh-CN');
+        sections.push(`【最近一篇小克日记】（${dateStr}）\n${k.content}`);
+      }
+      if (memoRes.rows.length > 0) {
+        sections.push(`【Memo 最新备忘】\n${memoRes.rows.map(x => x.content).join('\n')}`);
+      }
+      if (dailyRes.rows.length > 0) {
+        sections.push(`【Daily 最近状况】\n${dailyRes.rows.map(x => x.content).join('\n')}`);
+      }
+
+      sections.push(`【提醒】如果本次对话中安生分享了新的状态或事件，主动用 write_memory 写入 Daily 更新。如果有重要约定或变化，更新 Memo。对话结束时主动写小克日记。日记请写入"小克日记"。`);
+
+      result = sections.join('\n\n');
     } else if (name === 'write_memory') {
       await pool.query('INSERT INTO memories (content, category) VALUES ($1, $2)', [args.content, args.category || '日常']);
       result = '写入成功';
