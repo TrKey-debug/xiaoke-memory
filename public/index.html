@@ -369,7 +369,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
   let currentMemoryCategory = 'core';
   let searchTimeout = null;
   let currentWriteMode = 'diary';
-  const API_URL = 'http://101.32.127.140:3000http://101.32.127.140:3000';
+  const API_URL = 'https://memory.nightraven-ans.top/memory';
   const KEDIARY_CATEGORY = '小克日记';
 
   const goodnightMessages = [
@@ -479,6 +479,7 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
         <div class="kediary-letter">
           <div class="kediary-header-row">
             <div class="kediary-date-label">${k.date}</div>
+            <button class="submit-btn sm ghost" onclick="deleteKediary(${k.id})">删除</button>
           </div>
           <div class="kediary-letter-body">${escHtml(k.content)}</div>
           <div class="kediary-signature">小克</div>
@@ -844,6 +845,15 @@ textarea { width: 100%; min-height: 240px; background: transparent; border: none
     } catch(e) {
       showToast('删除失败，请检查网络');
     }
+  }
+
+  async function deleteKediary(id) {
+    if (!confirm('确定删除这封小克日记吗？')) return;
+    try {
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (res.ok) { showToast('已删除'); await loadAll(); }
+      else showToast('删除失败');
+    } catch(e) { showToast('删除失败，请检查网络'); }
   }
 
   function switchMemoryCategory(cat) { currentMemoryCategory = cat; renderMemories(); }
